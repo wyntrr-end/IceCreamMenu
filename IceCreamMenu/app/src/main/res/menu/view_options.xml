@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/btnGridView"
-        android:checkable="true"
-        android:icon="@drawable/ic_view_module_yellow_24dp"
-        android:title="@string/options_grid" />
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/btnListView"
-        android:checkable="true"
-        android:checked="true"
         android:icon="@drawable/ic_view_list_yellow_24dp"
-        android:title="@string/options_list" />
+        android:title="@string/options_list"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/btnGridView"
+        android:icon="@drawable/ic_view_module_yellow_24dp"
+        android:title="@string/options_grid"
+        app:showAsAction="never" />
 </menu>

@@ -1,6 +1,5 @@
 package com.peterson.icecreammenu;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -13,16 +12,27 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
-public class AddFlavorActivity extends AppCompatActivity {
+public class AddEditFlavorActivity extends AppCompatActivity {
     EditText txtFlavorName;
     EditText txtFlavorDesc;
     Spinner flavorType;
 
+    int mode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_flavor);
+        setContentView(R.layout.activity_add_edit_flavor);
+
+        mode = getIntent().getIntExtra("MODE", MainActivity.ADD_MODE);
+        Toolbar toolbar = findViewById(R.id.toolbar2);
+        if (mode == MainActivity.ADD_MODE) {
+            toolbar.setTitle(R.string.add_flavor_header);
+        } else {
+            toolbar.setTitle(R.string.edit_flavor_header);
+        }
 
         Button buttonSave = findViewById(R.id.buttonSave);
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -58,10 +68,11 @@ public class AddFlavorActivity extends AppCompatActivity {
             ).show();
         } else {
             Intent intent = new Intent();
+            Log.d("AddFlavorActivity", "flavor type = " + flavorType.getSelectedItem());
             intent.putExtra("TYPE", flavorType.getSelectedItem().toString());
             intent.putExtra("NAME", txtFlavorName.getText().toString());
             intent.putExtra("DESC", txtFlavorDesc.getText().toString());
-            setResult(1, intent);
+            setResult(mode, intent);
             finishAfterTransition();
         }
     }

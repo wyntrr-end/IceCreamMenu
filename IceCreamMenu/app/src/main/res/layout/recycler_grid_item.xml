@@ -2,20 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rvLayout"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="8dp">
 
   <ImageView
       android:id="@+id/rvImage"
-      android:layout_width="50dp"
-      android:layout_height="50dp"
-      android:tag="IMG"
+      android:layout_width="185dp"
+      android:layout_height="185dp"
       tools:src="@tools:sample/avatars" />
 
+<!--  TODO-->
   <LinearLayout
-      android:layout_width="wrap_content"
+      android:layout_width="185dp"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:orientation="vertical"
@@ -25,7 +25,6 @@
         android:id="@+id/rvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:tag="NAME"
         android:textColor="@color/colorFlavorName"
         android:textStyle="bold"
         tools:text="@tools:sample/lorem[3]" />
@@ -34,7 +33,6 @@
         android:id="@+id/rvDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:tag="DESC"
         android:textColor="@color/colorFlavorDesc"
         tools:text="@tools:sample/lorem[4]" />
   </LinearLayout>

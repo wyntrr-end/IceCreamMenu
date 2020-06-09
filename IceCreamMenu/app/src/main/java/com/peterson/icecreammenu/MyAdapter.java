@@ -42,7 +42,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     @Override
     public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
+        View v = null;
+        if (MainActivity.isGridView) {
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_grid_item, parent, false);
+        } else {
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_list_item, parent, false);
+        }
         FlavorHolder vh = new FlavorHolder(v);
         return vh;
     }
@@ -53,11 +58,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         // - get element from your dataset at this position
         final FlavorItem flavor = mflavors.get(position);
         // - replace the contents of the view with that element
-        holder.imageView.setImageBitmap(flavor.getImage());
+        holder.imageView.setImageResource(flavor.getImageRefID());
         holder.nameTextView.setText(flavor.getName());
         holder.descTextView.setText(flavor.getDescription());
 
-        if (MainActivity.ADMIN) {
+        if (MainActivity.isAdmin) {
             holder.linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

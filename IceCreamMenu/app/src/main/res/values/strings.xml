@@ -4,6 +4,7 @@
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
     <string name="add_flavor_header">Add New Flavor</string>
+    <string name="edit_flavor_header">Edit Flavor</string>
     <string name="save">Save</string>
     <string name="add_flavor_name_text">Flavor Name</string>
     <string name="add_flavor_desc_text">Flavor Description (Optional)</string>

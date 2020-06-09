@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddFlavorActivity">
+    tools:context=".AddEditFlavorActivity">
 
     <LinearLayout
         android:id="@+id/toolbar2Layout"
@@ -60,7 +60,7 @@
             android:id="@+id/imageView2"
             android:layout_width="185dp"
             android:layout_height="185dp"
-            app:srcCompat="@drawable/icecream1" />
+            app:srcCompat="@drawable/almond_fudge" />
 
         <EditText
             android:id="@+id/txtFlavorName"

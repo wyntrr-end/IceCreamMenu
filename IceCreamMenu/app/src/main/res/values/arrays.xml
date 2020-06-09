@@ -6,4 +6,31 @@
         <item>Gelato</item>
         <item>Sorbet</item>
     </string-array>
+    <string-array name="flavor_names_array">
+        <item>Almond Fudge</item>
+        <item>Bananasplit</item>
+        <item>Berryfruit Sorbet</item>
+        <item>Blueberry Yogurt</item>
+        <item>Butter Pecan</item>
+        <item>Cherry Chocolate</item>
+        <item>Chocolate Chip Cookie</item>
+        <item>Chocolate Chunk Cookie</item>
+        <item>Chocolate Fudge</item>
+        <item>Cookies &amp; Cream</item>
+        <item>English Toffee</item>
+        <item>Espresso</item>
+        <item>French Vanilla</item>
+        <item>Green Tea</item>
+        <item>Hokey Pokey</item>
+        <item>Chocolate</item>
+        <item>Lemon Lime Sorbet</item>
+        <item>Macadamia</item>
+        <item>Mango Sorbet</item>
+        <item>Mint Chocolate Chip</item>
+        <item>Neapolitan</item>
+        <item>Peanut Butter</item>
+        <item>Rocky Road</item>
+        <item>Rum Raisin</item>
+        <item>Strawberry</item>
+    </string-array>
 </resources>
