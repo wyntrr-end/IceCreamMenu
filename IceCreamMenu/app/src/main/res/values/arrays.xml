@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="flavor_types_array">
+        <item>Flavor Type</item>
+        <item>Ice Cream</item>
+        <item>Gelato</item>
+        <item>Sorbet</item>
+    </string-array>
+</resources>

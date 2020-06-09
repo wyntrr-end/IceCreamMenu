@@ -2,5 +2,12 @@
     <string name="app_name">Ice Cream Menu</string>
     <string name="main_header">Today\'s Flavors</string>
     <string name="tab1_header">Ice Cream</string>
-    <string name="tab2_header">Gelato</string>
+    <string name="tab2_header">Gelato &amp; Sorbet</string>
+    <string name="add_flavor_header">Add New Flavor</string>
+    <string name="save">Save</string>
+    <string name="add_flavor_name_text">Flavor Name</string>
+    <string name="add_flavor_desc_text">Flavor Description (Optional)</string>
+    <string name="options_grid">Case View</string>
+    <string name="options_list">Alphabetical List</string>
+    <string name="flavor_type_error_msg">Please specify a flavor type!</string>
 </resources>

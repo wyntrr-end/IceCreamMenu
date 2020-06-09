@@ -2,6 +2,8 @@ package com.peterson.icecreammenu;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.NonNull;
+
 public class FlavorItem implements Comparable<FlavorItem> {
     private Bitmap image;
     private String name;
@@ -20,6 +22,12 @@ public class FlavorItem implements Comparable<FlavorItem> {
     @Override
     public int compareTo(FlavorItem f) {
         return this.name.compareTo(f.name);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return name + ": " + description;
     }
 
     public Bitmap getImage() {
