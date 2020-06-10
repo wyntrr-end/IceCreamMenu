@@ -1,18 +1,15 @@
 package com.peterson.icecreammenu;
 
-import android.graphics.drawable.Drawable;
-
 import androidx.annotation.NonNull;
 
+// =================================================================================================
+// define the contents and properties of a FlavorItem
+// =================================================================================================
 public class FlavorItem implements Comparable<FlavorItem> {
     private int imageRefID;
     private String name;
-    private String description = "";
+    private String description;
 
-    public FlavorItem(int newImgID, String newName) {
-        imageRefID = newImgID;
-        name = newName;
-    }
     public FlavorItem(int newImgID, String newName, String newDescription) {
         imageRefID = newImgID;
         name = newName;
@@ -33,9 +30,11 @@ public class FlavorItem implements Comparable<FlavorItem> {
     public int getImageRefID() {
         return imageRefID;
     }
-    public String getName(){
+
+    public String getName() {
         return name;
     }
+
     public String getDescription() {
         return description;
     }

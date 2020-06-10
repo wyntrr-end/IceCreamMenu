@@ -12,69 +12,90 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+// =================================================================================================
+// class which defines how FlavorItems are displayed in the main RecyclerView
+// =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
-    private List<FlavorItem> mflavors;
+    private List<FlavorItem> mFlavorItemList;
+    private MainActivity mMainActivity;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public static class FlavorHolder extends RecyclerView.ViewHolder {
-        public LinearLayout linearLayout;
-        public ImageView imageView;
-        public TextView nameTextView;
-        public TextView descTextView;
+    // ---------------------------------------------------------------------------------------------
+    // basic constructor
+    // ---------------------------------------------------------------------------------------------
+    public MyAdapter(MainActivity mainActivity, List<FlavorItem> flavorItemList) {
+        mMainActivity = mainActivity;
+        mFlavorItemList = flavorItemList;
+    }
 
-        public FlavorHolder(View itemView) {
+    // ---------------------------------------------------------------------------------------------
+    // create new views (invoked by the layout manager)
+    // ---------------------------------------------------------------------------------------------
+    @Override
+    public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // create a new view using the appropriate layout (grid or list layout)
+        View v = LayoutInflater.from(parent.getContext()).inflate((
+                MainActivity.isGridView ?
+                        R.layout.recycler_grid_item :
+                        R.layout.recycler_list_item
+        ), parent, false);
+        return new FlavorHolder(v);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // set the contents of a view (invoked by the layout manager)
+    // ---------------------------------------------------------------------------------------------
+    @Override
+    public void onBindViewHolder(final FlavorHolder holder, int position) {
+        // get the FlavorItem at this position
+        final FlavorItem flavor = mFlavorItemList.get(position);
+
+        // replace the contents of the view with values appropriate for that FlavorItem
+        holder.imageView.setImageResource(flavor.getImageRefID());
+        holder.nameTextView.setText(flavor.getName());
+        holder.descTextView.setText(flavor.getDescription());
+
+        // add an onClickListener to launch an appropriate instance of AddEditFlavorActivity
+        // in Edit mode if the user is Admin
+        if (MainActivity.isAdmin) {
+            holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d(
+                            "Adapter",
+                            "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
+                    );
+                    mMainActivity.launchEditFlavorActivity(
+                            mMainActivity.getCurrentFocus(),
+                            holder.nameTextView.getText().toString()
+                    );
+                }
+            });
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Return the size of the dataset (invoked by the layout manager)
+    // ---------------------------------------------------------------------------------------------
+    @Override
+    public int getItemCount() {
+        return mFlavorItemList.size();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // class which defines a custom ViewHolder for FlavorItems
+    // ---------------------------------------------------------------------------------------------
+    static class FlavorHolder extends RecyclerView.ViewHolder {
+        LinearLayout linearLayout;
+        ImageView imageView;
+        TextView nameTextView;
+        TextView descTextView;
+
+        FlavorHolder(View itemView) {
             super(itemView);
             linearLayout = itemView.findViewById(R.id.rvLayout);
             imageView = itemView.findViewById(R.id.rvImage);
             nameTextView = itemView.findViewById(R.id.rvName);
             descTextView = itemView.findViewById(R.id.rvDesc);
         }
-    }
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(List<FlavorItem> flavors) {
-        mflavors = flavors;
-    }
-
-    // Create new views (invoked by the layout manager)
-    @Override
-    public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
-        View v = null;
-        if (MainActivity.isGridView) {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_grid_item, parent, false);
-        } else {
-            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_list_item, parent, false);
-        }
-        FlavorHolder vh = new FlavorHolder(v);
-        return vh;
-    }
-
-    // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(final FlavorHolder holder, int position) {
-        // - get element from your dataset at this position
-        final FlavorItem flavor = mflavors.get(position);
-        // - replace the contents of the view with that element
-        holder.imageView.setImageResource(flavor.getImageRefID());
-        holder.nameTextView.setText(flavor.getName());
-        holder.descTextView.setText(flavor.getDescription());
-
-        if (MainActivity.isAdmin) {
-            holder.linearLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d("onClick", "item \"" + holder.nameTextView.getText() + "\" clicked");
-                }
-            });
-        }
-    }
-
-    // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return mflavors.size();
     }
 }
