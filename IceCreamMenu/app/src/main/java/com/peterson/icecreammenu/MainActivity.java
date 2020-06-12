@@ -13,10 +13,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter gelatoAdapter;
 
     private TabLayout tabLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton btnAddNewFlavor;
     private ImageButton btnListView;
     private ImageButton btnGridView;
@@ -64,15 +71,28 @@ public class MainActivity extends AppCompatActivity {
 
         // add sample flavor information using names from R.array.flavor_names_array
         String[] mFlavorNameArray = getResources().getStringArray(R.array.flavor_names_array);
-        for (String s : mFlavorNameArray) {
-            String desc = "description of " + s + " goes here";
-            if (s.contains("Sorbet")) {
-                addFlavor("Sorbet", s, desc);
-            } else if (s.contains("Gelato")) {
-                addFlavor("Gelato", s, desc);
+        for (String name : mFlavorNameArray) {
+            String desc = "description of " + name + " goes here";
+            String type = "";
+            if (name.contains("Sorbet")) {
+                type = "Sorbet";
+            } else if (name.contains("Gelato")) {
+                type = "Gelato";
             } else {
-                addFlavor("Ice Cream", s, desc);
+                type = "Ice Cream";
             }
+
+            JSONObject jsonFlavor = new JSONObject();
+            try {
+                jsonFlavor.put("NAME", name);
+                jsonFlavor.put("DESC", desc);
+                jsonFlavor.put("TYPE", type);
+                Log.d("JSON", jsonFlavor.toString(2));
+            } catch (org.json.JSONException e) {
+                Log.d("JSON", "Error adding sample flavors in mainActivity.onCreate()");
+                e.printStackTrace();
+            }
+            addFlavor(jsonFlavor);
         }
 
         // allow toggling admin/user version when testing
@@ -149,6 +169,19 @@ public class MainActivity extends AppCompatActivity {
             btnAddNewFlavor.hide();
         }
 
+        // call the method to update the displayed content when the user performs
+        // a swipe-to-refresh gesture
+        swipeRefreshLayout = findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("Refresh", "onRefresh called from SwipeRefreshLayout");
+                        reloadContent();
+                    }
+                }
+        );
+
         // make sure the recyclerView loads properly
         updateViewType();
     }
@@ -199,17 +232,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // add a new flavor to the list
-        if (resultCode == ADD_MODE) {
-            assert data != null;
-            //TODO -- refresh list from JSON file instead, perhaps create a separate method
-            addFlavor(data.getStringExtra("TYPE"),
-                    data.getStringExtra("NAME"),
-                    data.getStringExtra("DESC"));
+        // if something has been changed, reload the content
+        if (resultCode != ADD_MODE && resultCode != EDIT_MODE) {
+            reloadContent();
         }
-
-        // edit an existing flavor
-        else assert resultCode != EDIT_MODE || data != null;
 
         // otherwise do nothing
     }
@@ -217,7 +243,20 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     // adds a new flavor to the list of flavors using the given type, name, and description
     // ---------------------------------------------------------------------------------------------
-    private void addFlavor(String type, String name, String desc) {
+    private void addFlavor(JSONObject jsonFlavor) {
+        String name = "";
+        String type = "";
+        String desc = "";
+
+        try {
+            name = jsonFlavor.getString("NAME");
+            type = jsonFlavor.getString("TYPE");
+            desc = jsonFlavor.getString("DESC");
+        } catch (org.json.JSONException e) {
+            Log.d("JSON", "Error parsing JSON flavor in addFlavor()");
+            e.printStackTrace();
+        }
+
         // if the name field is blank, do nothing
         if (name.equals("")) return;
 
@@ -261,5 +300,62 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btnAddNewFlavor.hide();
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // reload all the flavors from the "flavors.json" file
+    // ---------------------------------------------------------------------------------------------
+    private void reloadContent() {
+        // remember the old lists in case something fails
+        // TODO -- make these actually clone the lists
+        List<FlavorItem> oldIceCreams = iceCreamFlavorList;
+        List<FlavorItem> oldGelatos = gelatoFlavorList;
+        // clear the flavor lists so they can be rebuilt
+        iceCreamFlavorList.clear();
+        gelatoFlavorList.clear();
+
+        // read in the "flavors.json" file and get an array of the contained flavor names
+        File f = new File(getApplicationContext().getFilesDir(), "flavors.json");
+        JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(f);
+        JSONArray jsonNames = jsonFlavors.names();
+
+        if (jsonNames == null) {
+            Log.d("JSON", "Error: no names in jsonFlavors object in reloadContent()");
+            iceCreamFlavorList = oldIceCreams;
+            gelatoFlavorList = oldGelatos;
+            updateViewType();
+            swipeRefreshLayout.setRefreshing(false);
+            return;
+        }
+        try {
+            Log.d("JSON", jsonFlavors.toString(2));
+            Log.d("JSON", jsonNames.toString(2));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // iteratively add each flavor to the flavor lists
+        for (int i = 0; i < jsonNames.length(); i++) {
+            try {
+                // get the name at this index from the array of names
+                String name = jsonNames.getString(i);
+
+                // get the flavor corresponding with that name from the flavors object
+                // and then add it to the flavor lists
+                JSONObject jsonFlavor = jsonFlavors.getJSONObject(name);
+                addFlavor(jsonFlavor);
+            }
+            // if stuff fails, reload the old lists and exit
+            catch (org.json.JSONException e) {
+                Log.d("JSON", "Error reloading flavors from json file");
+                iceCreamFlavorList = oldIceCreams;
+                gelatoFlavorList = oldGelatos;
+                e.printStackTrace();
+                break;
+            }
+        }
+
+        //updateViewType();
+        swipeRefreshLayout.setRefreshing(false);
     }
 }

@@ -17,13 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 
 
 // =================================================================================================
@@ -35,20 +29,23 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     EditText txtFlavorCaseNo;
     Spinner flavorType;
     int mode;
+    String oldName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_flavor);
+        Intent intent = getIntent();
 
         //determine whether the activity is meant to add or edit a flavor
         // and set the title appropriately
-        mode = getIntent().getIntExtra("MODE", MainActivity.ADD_MODE);
+        mode = intent.getIntExtra("MODE", MainActivity.ADD_MODE);
         Toolbar toolbar = findViewById(R.id.toolbar2);
         if (mode == MainActivity.ADD_MODE) {
             toolbar.setTitle(R.string.add_flavor_header);
         } else {
             toolbar.setTitle(R.string.edit_flavor_header);
+            oldName = intent.getStringExtra("OLD_NAME");
         }
 
         //set up other view elements
@@ -102,39 +99,29 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         // convert the provided data into a JSONObject and save to file
         else {
             // read "flavors.json" into a JSONObject
-            // -- if file does not exist, create a new object from scratch
-            JSONObject jsonAllFlavors = null;
-            try {
-                jsonAllFlavors = readJsonObject();
-            } catch (FileNotFoundException e) {
-                jsonAllFlavors = new JSONObject();
-            } catch (IOException e) {
-                Log.d("File IO", "Error reading JSON object from file.");
-                e.printStackTrace();
-            }
+            File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
+            JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
             // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
             // using the flavor name as the object name
             //TODO -- Modifying in Edit mode
             JSONObject jsonFlavor = new JSONObject();
             try {
-                jsonFlavor.put("Name", txtFlavorName.getText().toString());
-                jsonFlavor.put("Desc", txtFlavorDesc.getText().toString());
-                jsonFlavor.put("Type", flavorType.getSelectedItem().toString());
-                jsonFlavor.put("Case", txtFlavorCaseNo.getText().toString());
+                jsonFlavor.put("NAME", txtFlavorName.getText().toString());
+                jsonFlavor.put("DESC", txtFlavorDesc.getText().toString());
+                jsonFlavor.put("TYPE", flavorType.getSelectedItem().toString());
+                jsonFlavor.put("CASE", txtFlavorCaseNo.getText().toString());
+                Log.d("JSON", jsonFlavor.toString(2));
+
                 jsonAllFlavors.put(txtFlavorName.getText().toString(), jsonFlavor);
+                //Log.d("JSON", jsonAllFlavors.toString(2));
             } catch (JSONException e) {
-                Log.d("File IO", "Error putting to JSON object.");
+                Log.d("JSON", "Error putting to JSON object.");
                 e.printStackTrace();
             }
 
             // write the updated jsonAllFlavors to "flavors.json"
-            try {
-                writeJsonObject(jsonAllFlavors);
-            } catch (IOException e) {
-                Log.d("File IO", "Error writing json file.");
-                e.printStackTrace();
-            }
+            JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
 
             // return to MainActivity
             Intent intent = new Intent();
@@ -149,51 +136,5 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     private void cancel() {
         setResult(0);
         finishAfterTransition();
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // attempts to return a JSONObject read from the "flavors.json" file
-    // ---------------------------------------------------------------------------------------------
-    private JSONObject readJsonObject() throws IOException {
-        File f = new File(getApplicationContext().getFilesDir(), "flavors.json");
-
-        // read in file and build JSON format String
-        FileReader fr = new FileReader(f);
-        BufferedReader br = new BufferedReader(fr);
-        StringBuilder sb = new StringBuilder();
-        String line = br.readLine();
-        while (line != null) {
-            sb.append(line).append("\n");
-            line = br.readLine();
-        }
-        br.close();
-        fr.close();
-        String jsonStr = sb.toString();
-
-        // convert JSON format String to JSONObject
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(jsonStr);
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-        }
-
-        return jsonObject;
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // attempts to write the given JSONObject to the "flavors.json" file
-    // ---------------------------------------------------------------------------------------------
-    private void writeJsonObject(JSONObject obj) throws IOException {
-        // convert to a JSON format String
-        String objStr = obj.toString();
-
-        // write to the file
-        File f = new File(getApplicationContext().getFilesDir(), "flavors.json");
-        FileWriter fw = new FileWriter(f);
-        BufferedWriter bw = new BufferedWriter(fw);
-        bw.write(objStr);
-        bw.close();
-        fw.close();
     }
 }
