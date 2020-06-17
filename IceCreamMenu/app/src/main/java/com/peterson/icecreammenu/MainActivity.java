@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         // if something has been changed, reload the content
-        if (resultCode != ADD_MODE && resultCode != EDIT_MODE) {
+        if (resultCode == ADD_MODE || resultCode == EDIT_MODE) {
             reloadContent();
         }
 
@@ -306,14 +306,6 @@ public class MainActivity extends AppCompatActivity {
     // reload all the flavors from the "flavors.json" file
     // ---------------------------------------------------------------------------------------------
     private void reloadContent() {
-        // remember the old lists in case something fails
-        // TODO -- make these actually clone the lists
-        List<FlavorItem> oldIceCreams = iceCreamFlavorList;
-        List<FlavorItem> oldGelatos = gelatoFlavorList;
-        // clear the flavor lists so they can be rebuilt
-        iceCreamFlavorList.clear();
-        gelatoFlavorList.clear();
-
         // read in the "flavors.json" file and get an array of the contained flavor names
         File f = new File(getApplicationContext().getFilesDir(), "flavors.json");
         JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(f);
@@ -321,9 +313,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (jsonNames == null) {
             Log.d("JSON", "Error: no names in jsonFlavors object in reloadContent()");
-            iceCreamFlavorList = oldIceCreams;
-            gelatoFlavorList = oldGelatos;
-            updateViewType();
             swipeRefreshLayout.setRefreshing(false);
             return;
         }
@@ -333,6 +322,19 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        // remember the old lists in case something fails
+        List<FlavorItem> oldIceCreams = new ArrayList<>();
+        for (FlavorItem item : iceCreamFlavorList) {
+            oldIceCreams.add(item);
+        }
+        List<FlavorItem> oldGelatos = new ArrayList<>();
+        for (FlavorItem item : gelatoFlavorList) {
+            oldGelatos.add(item);
+        }
+        // clear the flavor lists so they can be rebuilt
+        iceCreamFlavorList.clear();
+        gelatoFlavorList.clear();
 
         // iteratively add each flavor to the flavor lists
         for (int i = 0; i < jsonNames.length(); i++) {
@@ -348,8 +350,14 @@ public class MainActivity extends AppCompatActivity {
             // if stuff fails, reload the old lists and exit
             catch (org.json.JSONException e) {
                 Log.d("JSON", "Error reloading flavors from json file");
-                iceCreamFlavorList = oldIceCreams;
-                gelatoFlavorList = oldGelatos;
+                iceCreamFlavorList.clear();
+                gelatoFlavorList.clear();
+                for (FlavorItem item : oldIceCreams) {
+                    iceCreamFlavorList.add(item);
+                }
+                for (FlavorItem item : oldGelatos) {
+                    gelatoFlavorList.add(item);
+                }
                 e.printStackTrace();
                 break;
             }
