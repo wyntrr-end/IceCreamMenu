@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Ice Cream Menu</string>
+    <string name="app_name_short">IC Menu</string>
     <string name="main_header">Today\'s Flavors</string>
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
@@ -13,6 +14,6 @@
     <string name="flavor_type_error_msg">Please specify a flavor type!</string>
     <string name="flavor_duplicate_error_msg">Another flavor already has this name!</string>
     <string name="add_flavor_case_no">Case # (Optional)</string>
-    <string name="add_flavor_slot_no">Slot within case</string>
+    <string name="add_flavor_slot_desc">Slot within case</string>
     <string name="add_flavor_slot_caption">(From Customer Perspective)</string>
 </resources>

@@ -69,31 +69,8 @@ public class MainActivity extends AppCompatActivity {
         gelatoAdapter = new MyAdapter(this, gelatoFlavorList);
         recyclerView.setAdapter(iceCreamAdapter);
 
-        // add sample flavor information using names from R.array.flavor_names_array
-        String[] mFlavorNameArray = getResources().getStringArray(R.array.flavor_names_array);
-        for (String name : mFlavorNameArray) {
-            String desc = "description of " + name + " goes here";
-            String type = "";
-            if (name.contains("Sorbet")) {
-                type = "Sorbet";
-            } else if (name.contains("Gelato")) {
-                type = "Gelato";
-            } else {
-                type = "Ice Cream";
-            }
-
-            JSONObject jsonFlavor = new JSONObject();
-            try {
-                jsonFlavor.put("NAME", name);
-                jsonFlavor.put("DESC", desc);
-                jsonFlavor.put("TYPE", type);
-                Log.d("JSON", jsonFlavor.toString(2));
-            } catch (org.json.JSONException e) {
-                Log.d("JSON", "Error adding sample flavors in mainActivity.onCreate()");
-                e.printStackTrace();
-            }
-            addFlavor(jsonFlavor);
-        }
+        // load sample flavor information
+        loadSampleInfo();
 
         // allow toggling admin/user version when testing
         Button btnToggleAdmin = findViewById(R.id.btnToggleAdmin);
@@ -261,14 +238,17 @@ public class MainActivity extends AppCompatActivity {
         if (name.equals("")) return;
 
         // look for an image file based on the name of the flavor
-        // (defaults to blank if no such file is found)
-        // TODO -- add a proper response if no image found
         String drawableName = name.toLowerCase().replace("& ", "").replace(" ", "_");
         int imgID = getResources().getIdentifier(
                 drawableName,
                 "drawable",
                 getApplicationContext().getPackageName()
         );
+        // if no image is found, use purple ice cream icon
+        if (imgID == 0) {
+            imgID = R.drawable.ic_icecream_vector_purple;
+        }
+        Log.d("Image", "flavor = " + name + " | imgID = " + imgID);
 
         // add the new flavor to the corresponding list of flavors, re-sort the list,
         // and refresh the adapter
@@ -365,5 +345,60 @@ public class MainActivity extends AppCompatActivity {
 
         //updateViewType();
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // build sample flavor info based on names from R.array.flavor_names_array and store the info
+    // in both flavors.json and the internal flavor lists
+    // ---------------------------------------------------------------------------------------------
+    public void loadSampleInfo() {
+        // load names from R.array.flavor_names_array
+        String[] mFlavorNameArray = getResources().getStringArray(R.array.flavor_names_array);
+
+        // setup "flavors.json" as destination file
+        File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
+        JSONObject jsonAllFlavors = new JSONObject();
+
+        // for each name in the array, build a sample flavor item and add it to the appropriate
+        // list, in addition to adding it to jsonAllFlavors
+        for (String name : mFlavorNameArray) {
+            String desc = "description of " + name + " goes here";
+            String type = "";
+            if (name.contains("Sorbet")) {
+                type = "Sorbet";
+            } else if (name.contains("Gelato")) {
+                type = "Gelato";
+            } else {
+                type = "Ice Cream";
+            }
+
+            // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
+            // using the flavor name as the object name
+            JSONObject jsonFlavor = new JSONObject();
+            try {
+                jsonFlavor.put("NAME", name);
+                jsonFlavor.put("TYPE", type);
+                jsonFlavor.put("DESC", desc);
+                jsonFlavor.put("CASE", "");
+                jsonFlavor.put("SLOT", "");
+                Log.d("JSON", jsonFlavor.toString(2));
+
+                jsonAllFlavors.put(name, jsonFlavor);
+            } catch (JSONException e) {
+                Log.d("JSON", "Error putting to JSON object.");
+                e.printStackTrace();
+            }
+
+            // add this flavor to the flavorlists as well
+            addFlavor(jsonFlavor);
+        }
+
+        // write the updated jsonAllFlavors to "flavors.json"
+        JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
+        try {
+            Log.d("JSON", jsonAllFlavors.toString(2));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

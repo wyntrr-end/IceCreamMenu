@@ -55,11 +55,12 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/toolbar2Layout">
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <ImageButton
+            android:id="@+id/btnAddImage"
             android:layout_width="185dp"
             android:layout_height="185dp"
-            app:srcCompat="@drawable/almond_fudge" />
+            android:background="@drawable/french_vanilla"
+            app:srcCompat="@drawable/ic_add_a_photo_purple_48dp" />
 
         <EditText
             android:id="@+id/txtFlavorName"
@@ -71,7 +72,7 @@
 
         <Spinner
             android:id="@+id/spinnerFlavorType"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:layout_weight="1.5" />
 
@@ -100,71 +101,69 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/lblSlotDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="4dp"
                 android:paddingTop="4dp"
                 android:paddingEnd="4dp"
-                android:text="@string/add_flavor_slot_no"
+                android:text="@string/add_flavor_slot_desc"
                 android:textColor="@color/colorFlavorDesc"
                 android:textSize="18sp" />
 
-            <RadioGroup
-                android:id="@+id/radioSlotRow1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/radioButton3"
+                    android:id="@+id/rb1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton"
+                    android:id="@+id/rb2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton2"
+                    android:id="@+id/rb3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton4"
+                    android:id="@+id/rb4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
+            </LinearLayout>
 
-            </RadioGroup>
-
-            <RadioGroup
-                android:id="@+id/radioSlotRow2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/radioButton7"
+                    android:id="@+id/rb5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton8"
+                    android:id="@+id/rb6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton6"
+                    android:id="@+id/rb7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <RadioButton
-                    android:id="@+id/radioButton5"
+                    android:id="@+id/rb8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-
-            </RadioGroup>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textView2"

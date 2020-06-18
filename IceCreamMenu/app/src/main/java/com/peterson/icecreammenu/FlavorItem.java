@@ -18,7 +18,7 @@ public class FlavorItem implements Comparable<FlavorItem> {
 
     @Override
     public int compareTo(FlavorItem f) {
-        return this.name.compareTo(f.name);
+        return this.name.toLowerCase().compareTo(f.name.toLowerCase());
     }
 
     @NonNull

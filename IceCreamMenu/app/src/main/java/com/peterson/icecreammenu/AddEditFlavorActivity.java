@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
+import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,9 +36,19 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     EditText txtFlavorDesc;
 
     EditText txtFlavorCaseNo;
+    RadioButton rb1;
+    RadioButton rb2;
+    RadioButton rb3;
+    RadioButton rb4;
+    RadioButton rb5;
+    RadioButton rb6;
+    RadioButton rb7;
+    RadioButton rb8;
     int slotNo = 0;
     int mode;
     String oldName = "";
+    String oldCase = "";
+    int oldSlot = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +58,19 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         txtFlavorName = findViewById(R.id.txtFlavorName);
+        flavorType = findViewById(R.id.spinnerFlavorType);
         txtFlavorDesc = findViewById(R.id.txtFlavorDesc);
         txtFlavorCaseNo = findViewById(R.id.txtFlavorCaseNo);
-        flavorType = findViewById(R.id.spinnerFlavorType);
+        final TextView lblSlotDesc = findViewById(R.id.lblSlotDesc);
+
+        rb1 = findViewById(R.id.rb1);
+        rb2 = findViewById(R.id.rb2);
+        rb3 = findViewById(R.id.rb3);
+        rb4 = findViewById(R.id.rb4);
+        rb5 = findViewById(R.id.rb5);
+        rb6 = findViewById(R.id.rb6);
+        rb7 = findViewById(R.id.rb7);
+        rb8 = findViewById(R.id.rb8);
 
         // set up view elements
         ImageButton buttonSave = findViewById(R.id.buttonSave);
@@ -76,7 +98,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         flavorType.setAdapter(mAdapter);
 
         final LinearLayout panelSlot = findViewById(R.id.panelSlot);
-        panelSlot.setVisibility(View.INVISIBLE);
+        //panelSlot.setVisibility(View.INVISIBLE); TODO -- uncomment this when done testing
 
         txtFlavorCaseNo.addTextChangedListener(new TextWatcher() {
 
@@ -95,37 +117,34 @@ public class AddEditFlavorActivity extends AppCompatActivity {
                 // if no case # specified, don't show the slot panel, otherwise show it
                 if (s.toString().equals("")) {
                     panelSlot.setVisibility(View.INVISIBLE);
+                    uncheckAll();
                 } else {
                     panelSlot.setVisibility(View.VISIBLE);
+                    lblSlotDesc.setText(getString(R.string.add_flavor_slot_desc) +
+                            " " + s.toString() + ":");
+
                 }
             }
         });
 
-        final RadioGroup slotButtons1 = findViewById(R.id.radioSlotRow1);
-        final RadioGroup slotButtons2 = findViewById(R.id.radioSlotRow2);
-        slotButtons1.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        // set up radio buttons to act as a custom RadioGroup
+        CompoundButton.OnCheckedChangeListener radioGroupListener =
+                new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                // TODO -- make this work
-                if (slotButtons2.getCheckedRadioButtonId() != -1 && slotButtons1.getCheckedRadioButtonId() != -1) {
-                    Log.d("Check", "clearing checks in slotbuttons2...");
-                    slotButtons2.clearCheck();
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    checkButton(compoundButton);
                 }
-                Log.d("Check", "slotButtons1 i = " + i);
-                slotNo = i;
             }
-        });
-        slotButtons2.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if (slotButtons1.getCheckedRadioButtonId() != -1 && slotButtons2.getCheckedRadioButtonId() != -1) {
-                    Log.d("Check", "clearing checks in slotbuttons1...");
-                    slotButtons1.clearCheck();
-                }
-                Log.d("Check", "slotButtons2 i = " + i);
-                slotNo = i;
-            }
-        });
+        };
+        rb1.setOnCheckedChangeListener(radioGroupListener);
+        rb2.setOnCheckedChangeListener(radioGroupListener);
+        rb3.setOnCheckedChangeListener(radioGroupListener);
+        rb4.setOnCheckedChangeListener(radioGroupListener);
+        rb5.setOnCheckedChangeListener(radioGroupListener);
+        rb6.setOnCheckedChangeListener(radioGroupListener);
+        rb7.setOnCheckedChangeListener(radioGroupListener);
+        rb8.setOnCheckedChangeListener(radioGroupListener);
 
         // determine whether the activity is meant to add or edit a flavor
         // and set the title and text boxes appropriately
@@ -136,14 +155,14 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         } else {
             oldName = intent.getStringExtra("OLD_NAME");
             toolbar.setTitle(getString(R.string.edit_flavor_header) + ": " + oldName);
-            populateTextBoxes(oldName);
+            populateFields(oldName);
         }
     }
 
     // ---------------------------------------------------------------------------------------------
     // populate the text boxes with info from a given flavor (read from "flavors.json")
     // ---------------------------------------------------------------------------------------------
-    private void populateTextBoxes(String name) {
+    private void populateFields(String name) {
         // read "flavors.json" into a JSONObject
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
@@ -158,12 +177,64 @@ public class AddEditFlavorActivity extends AppCompatActivity {
                 case  "Sorbet" : flavorType.setSelection(3); break;
                 default: flavorType.setSelection(1);
             }
-            txtFlavorCaseNo.setText(jsonOldFlavor.getString("CASE"));
+            oldCase = jsonOldFlavor.getString("CASE");
+            txtFlavorCaseNo.setText(oldCase);
+            if (!oldCase.equals("")) {
+                checkButton(jsonOldFlavor.getInt("SLOT"));
+                oldSlot = slotNo;
+            }
 
         } catch (org.json.JSONException e) {
             Log.d("JSON", "Error getting from JSON object.");
             e.printStackTrace();
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // methods to operate custom radio button group
+    // ---------------------------------------------------------------------------------------------
+    private void uncheckAll() {
+        rb1.setChecked(false);
+        rb2.setChecked(false);
+        rb3.setChecked(false);
+        rb4.setChecked(false);
+        rb5.setChecked(false);
+        rb6.setChecked(false);
+        rb7.setChecked(false);
+        rb8.setChecked(false);
+        slotNo = 0;
+    }
+    private void checkButton(CompoundButton compoundButton) {
+        uncheckAll();
+        compoundButton.setChecked(true);
+        switch (compoundButton.getId()) {
+            case R.id.rb1 : slotNo = 1; break;
+            case R.id.rb2 : slotNo = 2; break;
+            case R.id.rb3 : slotNo = 3; break;
+            case R.id.rb4 : slotNo = 4; break;
+            case R.id.rb5 : slotNo = 5; break;
+            case R.id.rb6 : slotNo = 6; break;
+            case R.id.rb7 : slotNo = 7; break;
+            case R.id.rb8 : slotNo = 8; break;
+            default: slotNo = 0;
+        }
+        Log.d("Check", "slotNo = " + slotNo);
+    }
+    private void checkButton(int buttonNo) {
+        uncheckAll();
+        slotNo = buttonNo;
+        switch (buttonNo) {
+            case 1 : rb1.setChecked(true); break;
+            case 2 : rb2.setChecked(true); break;
+            case 3 : rb3.setChecked(true); break;
+            case 4 : rb4.setChecked(true); break;
+            case 5 : rb5.setChecked(true); break;
+            case 6 : rb6.setChecked(true); break;
+            case 7 : rb7.setChecked(true); break;
+            case 8 : rb8.setChecked(true); break;
+            default: break;
+        }
+        Log.d("Check", "slotNo = " + slotNo);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -193,11 +264,23 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         // read "flavors.json" into a JSONObject
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
-        //JSONArray jsonNames = jsonFlavors.names();
+//        File caseFile = new File(getApplicationContext().getFilesDir(), "cases.json");
+//        JSONObject jsonCases = JSONFileHandler.readJsonObjectFromFile(caseFile);
 
-        // if we're in edit mode, remove the old version
+        // if we're in edit mode, remove the old flavor and clear the old slot
         if (mode == MainActivity.EDIT_MODE) {
             jsonAllFlavors.remove(oldName);
+//            if (!oldCase.equals("")) {
+//                try {
+//                    jsonCases.getJSONObject(txtFlavorCaseNo.toString()).put(
+//                            Integer.toString(slotNo),
+//                            ""
+//                    );
+//                } catch (JSONException e) {
+//                    Log.d("JSON", "Error putting to JSON object.");
+//                    e.printStackTrace();
+//                }
+//            }
         }
 
         // if this flavor name has already been used, show error message and don't save
@@ -218,6 +301,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             jsonFlavor.put("DESC", txtFlavorDesc.getText().toString());
             jsonFlavor.put("TYPE", flavorType.getSelectedItem().toString());
             jsonFlavor.put("CASE", txtFlavorCaseNo.getText().toString());
+            jsonFlavor.put("SLOT", slotNo);
             Log.d("JSON", jsonFlavor.toString(2));
 
             jsonAllFlavors.put(txtFlavorName.getText().toString(), jsonFlavor);
