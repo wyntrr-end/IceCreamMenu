@@ -22,7 +22,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -224,11 +229,14 @@ public class MainActivity extends AppCompatActivity {
         String name = "";
         String type = "";
         String desc = "";
+        String img = "";
+        int imgID = 0;
 
         try {
             name = jsonFlavor.getString("NAME");
             type = jsonFlavor.getString("TYPE");
             desc = jsonFlavor.getString("DESC");
+            img = jsonFlavor.getString("IMG");
         } catch (org.json.JSONException e) {
             Log.d("JSON", "Error parsing JSON flavor in addFlavor()");
             e.printStackTrace();
@@ -237,27 +245,24 @@ public class MainActivity extends AppCompatActivity {
         // if the name field is blank, do nothing
         if (name.equals("")) return;
 
-        // look for an image file based on the name of the flavor
-        String drawableName = name.toLowerCase().replace("& ", "").replace(" ", "_");
-        int imgID = getResources().getIdentifier(
-                drawableName,
-                "drawable",
-                getApplicationContext().getPackageName()
-        );
-        // if no image is found, use purple ice cream icon
-        if (imgID == 0) {
-            imgID = R.drawable.ic_icecream_vector_purple;
+        if (img.equals("")) {
+            // look for an image file based on the name of the flavor
+            img = name.toLowerCase().replace("& ", "").replace(" ", "_");
+            // if no image is found, use purple ice cream icon
+            if (imgID == 0) {
+                imgID = R.drawable.ic_icecream_vector_purple;
+            }
         }
         Log.d("Image", "flavor = " + name + " | imgID = " + imgID);
 
         // add the new flavor to the corresponding list of flavors, re-sort the list,
         // and refresh the adapter
         if (type.equals("Ice Cream")) {
-            iceCreamFlavorList.add(new FlavorItem(imgID, name, desc));
+            iceCreamFlavorList.add(new FlavorItem(img, name, desc));
             Collections.sort(iceCreamFlavorList);
             iceCreamAdapter.notifyDataSetChanged();
         } else {
-            gelatoFlavorList.add(new FlavorItem(imgID, name, desc));
+            gelatoFlavorList.add(new FlavorItem(img, name, desc));
             Collections.sort(gelatoFlavorList);
             gelatoAdapter.notifyDataSetChanged();
         }
@@ -372,6 +377,29 @@ public class MainActivity extends AppCompatActivity {
                 type = "Ice Cream";
             }
 
+            String imgName = name.toLowerCase().replace("& ", "").replace(" ", "_") + ".jpg";
+//            File imgFile = new File(getApplicationContext().getFilesDir(), imgName);
+//            // write to the file
+//            try {
+//                OutputStream out = new FileOutputStream(imgFile);
+//                int imgID = getResources().getIdentifier(
+//                        imgName,
+//                        "drawable",
+//                        getApplicationContext().getPackageName()
+//                );
+//                out.write((byte) getDrawable(imgID));
+//
+//                FileWriter fw = new FileWriter(imgFile);
+//                BufferedWriter bw = new BufferedWriter(fw);
+//                bw.write(R.drawable.);
+//                bw.close();
+//                fw.close();
+//            }
+//            catch (IOException e){
+//                Log.d("JSON", "Error writing JSON object to file.");
+//                e.printStackTrace();
+//            }
+
             // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
             // using the flavor name as the object name
             JSONObject jsonFlavor = new JSONObject();
@@ -379,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
                 jsonFlavor.put("NAME", name);
                 jsonFlavor.put("TYPE", type);
                 jsonFlavor.put("DESC", desc);
+                jsonFlavor.put("IMG", imgName);
                 jsonFlavor.put("CASE", "");
                 jsonFlavor.put("SLOT", "");
                 Log.d("JSON", jsonFlavor.toString(2));

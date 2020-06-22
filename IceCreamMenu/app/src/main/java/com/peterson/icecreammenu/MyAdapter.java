@@ -1,5 +1,6 @@
 package com.peterson.icecreammenu;
 
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.List;
 
 // =================================================================================================
@@ -50,7 +52,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         final FlavorItem flavor = mFlavorItemList.get(position);
 
         // replace the contents of the view with values appropriate for that FlavorItem
-        holder.imageView.setImageResource(flavor.getImageRefID());
+        File flavorImg = new File(mMainActivity.getApplicationContext().getFilesDir(), flavor.getImageName());
+        holder.imageView.setImageURI(Uri.fromFile(flavorImg));
         holder.nameTextView.setText(flavor.getName());
         holder.descTextView.setText(flavor.getDescription());
 

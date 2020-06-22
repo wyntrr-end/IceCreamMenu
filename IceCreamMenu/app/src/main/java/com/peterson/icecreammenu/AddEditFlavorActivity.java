@@ -2,7 +2,9 @@ package com.peterson.icecreammenu;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,12 +27,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 // =================================================================================================
 // activity to manage adding new flavors or editing existing flavors
 // =================================================================================================
 public class AddEditFlavorActivity extends AppCompatActivity {
+    public static final int PICK_IMAGE = 1;
+
+    ImageButton btnAddImage;
     EditText txtFlavorName;
     Spinner flavorType;
     EditText txtFlavorDesc;
@@ -46,6 +55,8 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     RadioButton rb8;
     int slotNo = 0;
     int mode;
+    String oldImg = "";
+    String tmpImg = "tmp.jpg";
     String oldName = "";
     String oldCase = "";
     int oldSlot = 0;
@@ -57,6 +68,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_edit_flavor);
         Intent intent = getIntent();
 
+        btnAddImage = findViewById(R.id.btnAddImage);
         txtFlavorName = findViewById(R.id.txtFlavorName);
         flavorType = findViewById(R.id.spinnerFlavorType);
         txtFlavorDesc = findViewById(R.id.txtFlavorDesc);
@@ -85,6 +97,14 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cancel();
+            }
+        });
+
+        btnAddImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("Image", "btnAddImage has been clicked!");
+                pickImage();
             }
         });
 
@@ -170,6 +190,13 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         try {
             JSONObject jsonOldFlavor = jsonAllFlavors.getJSONObject(name);
 
+            oldImg = jsonOldFlavor.getString("IMG");
+            File flavorImg = new File(getApplicationContext().getFilesDir(), oldImg);
+            Log.d("Image", "\n\rimg = " + oldImg + "\n\rflavorImg = " + flavorImg + "\n\rflavorImg.exists() = " + flavorImg.exists());
+            if (flavorImg.exists()) {
+                btnAddImage.setImageURI(Uri.fromFile(flavorImg));
+            }
+
             txtFlavorName.setText(name);
             txtFlavorDesc.setText(jsonOldFlavor.getString("DESC"));
             switch (jsonOldFlavor.getString("TYPE")) {
@@ -191,8 +218,53 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // methods to operate custom radio button group
+    // methods to allow the user to choose an image for the flavor using the gallery
     // ---------------------------------------------------------------------------------------------
+    private void pickImage() {
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent, cameraIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE);
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            Log.d("IMAGE", "Image has been picked.");
+            if (data == null) {
+                Log.e("IMAGE", "Image picker returned null.");
+                return;
+            }
+
+            File flavorFile = new File(getApplicationContext().getFilesDir(), oldImg);
+            try {
+                Log.d("Image", "data.getDataString() = " + data.getDataString());
+                InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
+                byte[] buffer = new byte[inputStream.available()];
+                inputStream.read(buffer);
+
+                OutputStream out = new FileOutputStream(flavorFile);
+                out.write(buffer);
+                inputStream.close();
+                out.close();
+                Log.d("Image", "Wrote image to " + oldImg);
+            } catch (FileNotFoundException e) {
+                Log.e("IMAGE", "Image file not found.");
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            btnAddImage.setImageURI(Uri.fromFile(flavorFile));
+        }
+    }
+
     private void uncheckAll() {
         rb1.setChecked(false);
         rb2.setChecked(false);
@@ -300,6 +372,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             jsonFlavor.put("NAME", newName);
             jsonFlavor.put("DESC", txtFlavorDesc.getText().toString());
             jsonFlavor.put("TYPE", flavorType.getSelectedItem().toString());
+            jsonFlavor.put("IMG", "");
             jsonFlavor.put("CASE", txtFlavorCaseNo.getText().toString());
             jsonFlavor.put("SLOT", slotNo);
             Log.d("JSON", jsonFlavor.toString(2));

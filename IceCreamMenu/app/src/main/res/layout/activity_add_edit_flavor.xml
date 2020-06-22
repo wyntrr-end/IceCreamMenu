@@ -59,8 +59,11 @@
             android:id="@+id/btnAddImage"
             android:layout_width="185dp"
             android:layout_height="185dp"
-            android:background="@drawable/french_vanilla"
-            app:srcCompat="@drawable/ic_add_a_photo_purple_48dp" />
+            android:background="?attr/actionBarItemBackground"
+            android:foreground="@drawable/ic_add_a_photo_grey_24dp"
+            android:foregroundGravity="top|right"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/ic_icecream_vector_purple" />
 
         <EditText
             android:id="@+id/txtFlavorName"
