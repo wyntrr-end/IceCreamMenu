@@ -1,11 +1,15 @@
 package com.peterson.icecreammenu;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -23,10 +27,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +45,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static Boolean TESTING = true;
     public static Boolean isAdmin = true;
+    public static Boolean INIT = true;
     public static Boolean isGridView = false;
     public static int ADD_MODE = 1;
     public static int EDIT_MODE = 2;
@@ -74,20 +82,38 @@ public class MainActivity extends AppCompatActivity {
         gelatoAdapter = new MyAdapter(this, gelatoFlavorList);
         recyclerView.setAdapter(iceCreamAdapter);
 
-        // load sample flavor information
-        loadSampleInfo();
+        // load sample flavor information only if the app is being initialised
+        // ============================ WARNING ==============================
+        // INIT will be true every time the app is launched
+        // ===================================================================
+        Log.d("INIT", "INIT = " + INIT);
+        if (INIT) loadSampleInfo();
 
         // allow toggling admin/user version when testing
-        Button btnToggleAdmin = findViewById(R.id.btnToggleAdmin);
+        Switch switchAdmin = findViewById(R.id.switchAdmin);
+        switchAdmin.setChecked(isAdmin);
         if (TESTING) {
-            btnToggleAdmin.setOnClickListener(new View.OnClickListener() {
+            switchAdmin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     toggleAdmin();
                 }
             });
         } else {
-            btnToggleAdmin.setVisibility(View.GONE);
+            switchAdmin.setVisibility(View.GONE);
+        }
+
+        Button btnLoadSampleData = findViewById(R.id.btnLoadData);
+        if (TESTING) {
+            btnLoadSampleData.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    loadSampleInfo();
+                    reloadContent();
+                }
+            });
+        } else {
+            btnLoadSampleData.setVisibility(View.GONE);
         }
 
         // switch to list view when tapping on btnListView
@@ -166,6 +192,9 @@ public class MainActivity extends AppCompatActivity {
 
         // make sure the recyclerView loads properly
         updateViewType();
+        if (!INIT) reloadContent();
+
+        INIT = false;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -173,18 +202,34 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     private void updateViewType() {
         // make sure the interface buttons are yellow when active and grey when not active
-        btnListView.setImageResource(isGridView ? R.drawable.ic_view_list_grey_24dp : R.drawable.ic_view_list_yellow_24dp);
-        btnGridView.setImageResource(isGridView ? R.drawable.ic_view_module_yellow_24dp : R.drawable.ic_view_module_grey_24dp);
+        btnListView.setImageResource(
+                isGridView ?
+                        R.drawable.ic_view_list_grey_24dp :
+                        R.drawable.ic_view_list_yellow_24dp
+        );
+        btnGridView.setImageResource(
+                isGridView ?
+                        R.drawable.ic_view_module_yellow_24dp :
+                        R.drawable.ic_view_module_grey_24dp
+        );
 
         // save the current adapter for later
         RecyclerView.Adapter mAdapter = recyclerView.getAdapter();
         // set the layout manager according to the current view mode
-        recyclerView.setLayoutManager(isGridView ? new GridLayoutManager(this, 4) : new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(
+                isGridView ?
+                        new GridLayoutManager(this, 4) :
+                        new LinearLayoutManager(this)
+        );
         // reset the adapter to refresh the layout
         recyclerView.setAdapter(mAdapter);
 
         // notify the user which view mode we are now in
-        Toast.makeText(getApplicationContext(), (isGridView ? "View by Case" : "View Alphabetically"), Toast.LENGTH_LONG).show();
+        Toast.makeText(
+                getApplicationContext(),
+                (isGridView ? "View by Case" : "View Alphabetically"),
+                Toast.LENGTH_SHORT
+        ).show();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -230,30 +275,20 @@ public class MainActivity extends AppCompatActivity {
         String type = "";
         String desc = "";
         String img = "";
-        int imgID = 0;
 
+        // get the fields from the JSONObject
         try {
             name = jsonFlavor.getString("NAME");
             type = jsonFlavor.getString("TYPE");
             desc = jsonFlavor.getString("DESC");
             img = jsonFlavor.getString("IMG");
         } catch (org.json.JSONException e) {
-            Log.d("JSON", "Error parsing JSON flavor in addFlavor()");
+            Log.e("JSON", "Error parsing JSON flavor in addFlavor()");
             e.printStackTrace();
         }
 
-        // if the name field is blank, do nothing
-        if (name.equals("")) return;
-
-        if (img.equals("")) {
-            // look for an image file based on the name of the flavor
-            img = name.toLowerCase().replace("& ", "").replace(" ", "_");
-            // if no image is found, use purple ice cream icon
-            if (imgID == 0) {
-                imgID = R.drawable.ic_icecream_vector_purple;
-            }
-        }
-        Log.d("Image", "flavor = " + name + " | imgID = " + imgID);
+        // if the name or type fields are blank, do nothing
+        if (name.equals("") || type.equals("")) return;
 
         // add the new flavor to the corresponding list of flavors, re-sort the list,
         // and refresh the adapter
@@ -296,16 +331,19 @@ public class MainActivity extends AppCompatActivity {
         JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(f);
         JSONArray jsonNames = jsonFlavors.names();
 
+        // make sure there are names in the jsonFlavors object
         if (jsonNames == null) {
-            Log.d("JSON", "Error: no names in jsonFlavors object in reloadContent()");
+            Log.e("JSON", "Error: no names in jsonFlavors object in reloadContent()");
             swipeRefreshLayout.setRefreshing(false);
             return;
         }
-        try {
-            Log.d("JSON", jsonFlavors.toString(2));
-            Log.d("JSON", jsonNames.toString(2));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (TESTING) {
+            try {
+                Log.d("JSON", jsonFlavors.toString(2));
+                Log.d("JSON", jsonNames.toString(2));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         // remember the old lists in case something fails
@@ -334,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
             }
             // if stuff fails, reload the old lists and exit
             catch (org.json.JSONException e) {
-                Log.d("JSON", "Error reloading flavors from json file");
+                Log.e("JSON", "Error reloading flavors from json file");
                 iceCreamFlavorList.clear();
                 gelatoFlavorList.clear();
                 for (FlavorItem item : oldIceCreams) {
@@ -348,20 +386,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //updateViewType();
         swipeRefreshLayout.setRefreshing(false);
     }
 
     // ---------------------------------------------------------------------------------------------
     // build sample flavor info based on names from R.array.flavor_names_array and store the info
     // in both flavors.json and the internal flavor lists
+    // -- this is only for use when testing
     // ---------------------------------------------------------------------------------------------
     public void loadSampleInfo() {
         // load names from R.array.flavor_names_array
         String[] mFlavorNameArray = getResources().getStringArray(R.array.flavor_names_array);
 
-        // setup "flavors.json" as destination file
+        // setup "flavors.json" as destination file (overwrite it if the file exists)
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
+        flavorFile.delete();
         JSONObject jsonAllFlavors = new JSONObject();
 
         // for each name in the array, build a sample flavor item and add it to the appropriate
@@ -377,28 +416,37 @@ public class MainActivity extends AppCompatActivity {
                 type = "Ice Cream";
             }
 
-            String imgName = name.toLowerCase().replace("& ", "").replace(" ", "_") + ".jpg";
-//            File imgFile = new File(getApplicationContext().getFilesDir(), imgName);
-//            // write to the file
-//            try {
-//                OutputStream out = new FileOutputStream(imgFile);
-//                int imgID = getResources().getIdentifier(
-//                        imgName,
-//                        "drawable",
-//                        getApplicationContext().getPackageName()
-//                );
-//                out.write((byte) getDrawable(imgID));
-//
-//                FileWriter fw = new FileWriter(imgFile);
-//                BufferedWriter bw = new BufferedWriter(fw);
-//                bw.write(R.drawable.);
-//                bw.close();
-//                fw.close();
-//            }
-//            catch (IOException e){
-//                Log.d("JSON", "Error writing JSON object to file.");
-//                e.printStackTrace();
-//            }
+            // find the appropriate drawable based on the flavor name and copy it to the app files
+            // for use
+            String imgName = name.toLowerCase().replace("& ", "").replace(" ", "_");
+            File imgFile = new File(getApplicationContext().getFilesDir(), imgName + ".jpg");
+            try {
+                // get the drawable id of the file with the given imgName
+                int imgID = getResources().getIdentifier(
+                        imgName,
+                        "drawable",
+                        getApplicationContext().getPackageName()
+                );
+                // if such a drawable exists, copy it to app files using the same name
+                if (imgID != 0) {
+                    OutputStream out = new FileOutputStream(imgFile);
+                    Drawable d = getDrawable(imgID);
+                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    out.close();
+                    Log.d("Image", "Wrote image to " + imgFile);
+                    imgName = imgName + ".jpg";
+                }
+                // otherwise set imgName blank so a placeholder will be used
+                else {
+                    imgName = "";
+                }
+            }
+            catch (IOException e){
+                Log.e("Image", "Error writing image.");
+                imgName = "";
+                e.printStackTrace();
+            }
 
             // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
             // using the flavor name as the object name
@@ -414,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
 
                 jsonAllFlavors.put(name, jsonFlavor);
             } catch (JSONException e) {
-                Log.d("JSON", "Error putting to JSON object.");
+                Log.e("JSON", "Error putting to JSON object.");
                 e.printStackTrace();
             }
 

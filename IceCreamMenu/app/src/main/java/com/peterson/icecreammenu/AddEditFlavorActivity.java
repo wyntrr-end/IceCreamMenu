@@ -2,6 +2,8 @@ package com.peterson.icecreammenu;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -32,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 // =================================================================================================
 // activity to manage adding new flavors or editing existing flavors
@@ -57,6 +60,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     int mode;
     String oldImg = "";
     String tmpImg = "tmp.jpg";
+    boolean imgChanged = false;
     String oldName = "";
     String oldCase = "";
     int oldSlot = 0;
@@ -120,6 +124,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         final LinearLayout panelSlot = findViewById(R.id.panelSlot);
         //panelSlot.setVisibility(View.INVISIBLE); TODO -- uncomment this when done testing
 
+        // if no case # specified, don't show the slot panel, otherwise show it
         txtFlavorCaseNo.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -134,14 +139,12 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // if no case # specified, don't show the slot panel, otherwise show it
                 if (s.toString().equals("")) {
                     panelSlot.setVisibility(View.INVISIBLE);
                     uncheckAll();
                 } else {
                     panelSlot.setVisibility(View.VISIBLE);
-                    lblSlotDesc.setText(getString(R.string.add_flavor_slot_desc) +
-                            " " + s.toString() + ":");
+                    lblSlotDesc.setText(getString(R.string.add_flavor_slot_desc) + " " + s.toString() + ":");
 
                 }
             }
@@ -190,13 +193,17 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         try {
             JSONObject jsonOldFlavor = jsonAllFlavors.getJSONObject(name);
 
+            // if an image name was provided previously, load and display that image, otherwise
+            // the placeholder icon will be shown by default
             oldImg = jsonOldFlavor.getString("IMG");
-            File flavorImg = new File(getApplicationContext().getFilesDir(), oldImg);
-            Log.d("Image", "\n\rimg = " + oldImg + "\n\rflavorImg = " + flavorImg + "\n\rflavorImg.exists() = " + flavorImg.exists());
-            if (flavorImg.exists()) {
-                btnAddImage.setImageURI(Uri.fromFile(flavorImg));
+            if (!oldImg.equals("")) {
+                File flavorImgFile = new File(getApplicationContext().getFilesDir(), oldImg);
+                if (flavorImgFile.exists()) {
+                    btnAddImage.setImageURI(Uri.fromFile(flavorImgFile));
+                }
             }
 
+            // set the name, description, and flavor type fields
             txtFlavorName.setText(name);
             txtFlavorDesc.setText(jsonOldFlavor.getString("DESC"));
             switch (jsonOldFlavor.getString("TYPE")) {
@@ -204,6 +211,8 @@ public class AddEditFlavorActivity extends AppCompatActivity {
                 case  "Sorbet" : flavorType.setSelection(3); break;
                 default: flavorType.setSelection(1);
             }
+
+            // if a case # was provided previously, set up the slot checkboxes appropriately
             oldCase = jsonOldFlavor.getString("CASE");
             txtFlavorCaseNo.setText(oldCase);
             if (!oldCase.equals("")) {
@@ -218,24 +227,33 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // methods to allow the user to choose an image for the flavor using the gallery
+    // provide the user with a selection of locations from which to obtain a new flavor image
     // ---------------------------------------------------------------------------------------------
     private void pickImage() {
+        // intent which allows choosing image content from the file explorer
         Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getIntent.setType("image/*");
 
+        // intent which allows choosing image content from "photos"
         Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickIntent.setType("image/*");
 
+        // intent which allows using the camera to capture a new photo
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
+        // intent which wraps the above intents into a single chooser
         Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent, cameraIntent});
 
         startActivityForResult(chooserIntent, PICK_IMAGE);
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // save any image the user might choose to a new file
+    // ---------------------------------------------------------------------------------------------
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // if an image was picked, save it
         if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
             Log.d("IMAGE", "Image has been picked.");
             if (data == null) {
@@ -243,28 +261,51 @@ public class AddEditFlavorActivity extends AppCompatActivity {
                 return;
             }
 
-            File flavorFile = new File(getApplicationContext().getFilesDir(), oldImg);
+            // new image file name is generated based on the current time
+            tmpImg = System.currentTimeMillis() + ".jpg";
+            File tmpFlavorImgFile = new File(getApplicationContext().getFilesDir(), tmpImg);
             try {
-                Log.d("Image", "data.getDataString() = " + data.getDataString());
-                InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
-                byte[] buffer = new byte[inputStream.available()];
-                inputStream.read(buffer);
+                Bitmap bitmap;
+                // if we can call getData() then this is probably an existing image, so
+                // convert it to a bitmap
+                if (data.getData() != null) {
+                    Log.d("Image", "data.getDataString() = " + data.getDataString());
+                    InputStream in = getApplicationContext().getContentResolver().openInputStream(data.getData());
+                    bitmap = BitmapFactory.decodeStream(in);
+                    assert in != null : "InputStream is null";
+                    in.close();
+                }
+                // if we can't call getData(), then this is probably a new photo, so convert
+                // it to a bitmap (different method than for an existing image)
+                else {
+                    bitmap = (Bitmap) Objects.requireNonNull(data.getExtras()).get("data");
+                    // TODO -- this currently saves a low-quality image, needs more work to save
+                    //  full-res version
+                }
 
-                OutputStream out = new FileOutputStream(flavorFile);
-                out.write(buffer);
-                inputStream.close();
+                // save the generated bitmap to the new file as a jpg
+                OutputStream out = new FileOutputStream(tmpFlavorImgFile);
+                assert bitmap != null : "Bitmap is null";
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
                 out.close();
-                Log.d("Image", "Wrote image to " + oldImg);
-            } catch (FileNotFoundException e) {
-                Log.e("IMAGE", "Image file not found.");
-                e.printStackTrace();
+                Log.d("Image", "Wrote image to " + tmpFlavorImgFile);
+
+                // make sure the ImageButton is updated with the new image
+                btnAddImage.setImageDrawable(getDrawable(R.drawable.ic_icecream_vector_purple));
+                btnAddImage.setImageURI(Uri.fromFile(tmpFlavorImgFile));
+
+                imgChanged = true;
             } catch (IOException e) {
+                Log.e("IMAGE", "Image file error.");
                 e.printStackTrace();
             }
-            btnAddImage.setImageURI(Uri.fromFile(flavorFile));
         }
+        // if no image was picked, do nothing
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // methods for making the radio buttons act as a custom RadioGroup
+    // ---------------------------------------------------------------------------------------------
     private void uncheckAll() {
         rb1.setChecked(false);
         rb2.setChecked(false);
@@ -342,6 +383,11 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         // if we're in edit mode, remove the old flavor and clear the old slot
         if (mode == MainActivity.EDIT_MODE) {
             jsonAllFlavors.remove(oldName);
+            // if the image has been changed, remove the old image file
+            if (imgChanged) {
+                boolean deleted = new File(getApplicationContext().getFilesDir(), oldImg).delete();
+                Log.d("Image", "Old image deleted = " + deleted);
+            }
 //            if (!oldCase.equals("")) {
 //                try {
 //                    jsonCases.getJSONObject(txtFlavorCaseNo.toString()).put(
@@ -372,7 +418,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             jsonFlavor.put("NAME", newName);
             jsonFlavor.put("DESC", txtFlavorDesc.getText().toString());
             jsonFlavor.put("TYPE", flavorType.getSelectedItem().toString());
-            jsonFlavor.put("IMG", "");
+            jsonFlavor.put("IMG", imgChanged ? tmpImg : oldImg);
             jsonFlavor.put("CASE", txtFlavorCaseNo.getText().toString());
             jsonFlavor.put("SLOT", slotNo);
             Log.d("JSON", jsonFlavor.toString(2));
@@ -397,6 +443,10 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     // returns to MainActivity without saving any data entered/modified
     // ---------------------------------------------------------------------------------------------
     private void cancel() {
+        // make sure to delete any image files created before cancelling
+        boolean deleted = new File(getApplicationContext().getFilesDir(), tmpImg).delete();
+        Log.d("Image", "Temp image deleted = " + deleted);
+
         setResult(0);
         finishAfterTransition();
     }

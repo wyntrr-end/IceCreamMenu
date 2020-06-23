@@ -27,12 +27,20 @@
             app:title="@string/main_header"
             app:titleTextColor="@color/colorAccent" />
 
-        <Button
-            android:id="@+id/btnToggleAdmin"
+        <Switch
+            android:id="@+id/switchAdmin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="toggle admin" />
+            android:layout_weight="1"
+            android:text="admin" />
+
+        <Button
+            android:id="@+id/btnLoadData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="data
+" />
 
         <ImageButton
             android:id="@+id/btnListView"
