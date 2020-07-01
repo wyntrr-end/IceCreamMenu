@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static Boolean isGridView = false;
     public static int ADD_MODE = 1;
     public static int EDIT_MODE = 2;
+    public static int AVAILABILITY_MODE = 3;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter iceCreamAdapter;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton btnAddNewFlavor;
-    private ImageButton btnListView;
+    private ImageButton btnEditAvailableFlavors;
     private ImageButton btnViewMode;
 
     private List<FlavorItem> iceCreamFlavorList;
@@ -152,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // allow adding new flavors if the user is Admin
-        btnAddNewFlavor = findViewById(R.id.buttonAddNewFlavor);
+        btnAddNewFlavor = findViewById(R.id.btnAddNewFlavor);
         btnAddNewFlavor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,6 +162,18 @@ public class MainActivity extends AppCompatActivity {
         });
         if (!isAdmin) {
             btnAddNewFlavor.hide();
+        }
+
+        // allow editing the available flavors list if the user is Admin
+        btnEditAvailableFlavors = findViewById(R.id.btnEditAvailableFlavors);
+        btnEditAvailableFlavors.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchEditFlavorAvailabilityActivity(v);
+            }
+        });
+        if (!isAdmin) {
+            btnEditAvailableFlavors.setVisibility(View.GONE);
         }
 
         // call the method to update the displayed content when the user performs
@@ -204,6 +217,14 @@ public class MainActivity extends AppCompatActivity {
         );
         // reset the adapter to refresh the layout
         recyclerView.setAdapter(mAdapter);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // launches EditFlavorListActivity
+    // ---------------------------------------------------------------------------------------------
+    private void launchEditFlavorAvailabilityActivity(View v) {
+        Intent intent = new Intent(this, EditFlavorAvailabilityActivity.class);
+        startActivityForResult(intent, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -291,8 +312,10 @@ public class MainActivity extends AppCompatActivity {
         isAdmin = !isAdmin;
         if (isAdmin) {
             btnAddNewFlavor.show();
+            btnEditAvailableFlavors.setVisibility(View.VISIBLE);
         } else {
             btnAddNewFlavor.hide();
+            btnEditAvailableFlavors.setVisibility(View.GONE);
         }
     }
 

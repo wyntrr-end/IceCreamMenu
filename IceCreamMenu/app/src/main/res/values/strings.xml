@@ -4,13 +4,11 @@
     <string name="main_header">Today\'s Flavors</string>
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
+    <string name="edit_flavor_list_header">Edit Flavor Availability</string>
     <string name="add_flavor_header">Add New Flavor</string>
     <string name="edit_flavor_header">Edit Flavor</string>
-    <string name="save">Save</string>
     <string name="add_flavor_name_text">Flavor Name</string>
     <string name="add_flavor_desc_text">Flavor Description (Optional)</string>
-    <string name="options_grid">Case View</string>
-    <string name="options_list">Alphabetical List</string>
     <string name="flavor_type_error_msg">Please specify a flavor type!</string>
     <string name="flavor_duplicate_error_msg">Another flavor already has this name!</string>
     <string name="add_flavor_case_no">Case # (Optional)</string>
