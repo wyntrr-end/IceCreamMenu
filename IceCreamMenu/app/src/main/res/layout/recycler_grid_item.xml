@@ -10,10 +10,9 @@
 
   <ImageView
       android:id="@+id/rvImage"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:adjustViewBounds="true"
-      android:scaleType="fitXY"
+      android:layout_width="100dp"
+      android:layout_height="100dp"
+      android:scaleType="centerCrop"
       tools:src="@tools:sample/avatars" />
 
   <!--  TODO-->

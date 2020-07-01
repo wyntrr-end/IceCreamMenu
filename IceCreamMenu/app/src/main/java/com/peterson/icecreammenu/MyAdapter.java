@@ -1,5 +1,6 @@
 package com.peterson.icecreammenu;
 
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.List;
 
 // =================================================================================================
@@ -50,16 +52,24 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         final FlavorItem flavor = mFlavorItemList.get(position);
 
         // replace the contents of the view with values appropriate for that FlavorItem
-        holder.imageView.setImageResource(flavor.getImageRefID());
+        String flavorImgName = flavor.getImageName();
+        if (!flavorImgName.equals("")) {
+            // if an image name is given, use that to set the image
+            File flavorImg = new File(mMainActivity.getApplicationContext().getFilesDir(), flavorImgName);
+            holder.imageView.setImageURI(Uri.fromFile(flavorImg));
+        } else {
+            // if no image name is given, use the placeholder icon
+            holder.imageView.setImageResource(R.drawable.ic_icecream_vector_purple);
+        }
         holder.nameTextView.setText(flavor.getName());
         holder.descTextView.setText(flavor.getDescription());
 
         // add an onClickListener to launch an appropriate instance of AddEditFlavorActivity
         // in Edit mode if the user is Admin
-        if (MainActivity.isAdmin) {
-            holder.linearLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (MainActivity.isAdmin) {
                     Log.d(
                             "Adapter",
                             "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
@@ -69,8 +79,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                             holder.nameTextView.getText().toString()
                     );
                 }
-            });
-        }
+            }
+        });
     }
 
     // ---------------------------------------------------------------------------------------------

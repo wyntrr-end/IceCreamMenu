@@ -6,12 +6,12 @@ import androidx.annotation.NonNull;
 // define the contents and properties of a FlavorItem
 // =================================================================================================
 public class FlavorItem implements Comparable<FlavorItem> {
-    private int imageRefID;
+    private String imageName;
     private String name;
     private String description;
 
-    public FlavorItem(int newImgID, String newName, String newDescription) {
-        imageRefID = newImgID;
+    public FlavorItem(String newImgName, String newName, String newDescription) {
+        imageName = newImgName;
         name = newName;
         description = newDescription;
     }
@@ -27,8 +27,8 @@ public class FlavorItem implements Comparable<FlavorItem> {
         return name + ": " + description;
     }
 
-    public int getImageRefID() {
-        return imageRefID;
+    public String getImageName() {
+        return imageName;
     }
 
     public String getName() {
