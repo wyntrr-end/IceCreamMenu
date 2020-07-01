@@ -34,6 +34,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 // =================================================================================================
@@ -238,12 +240,18 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickIntent.setType("image/*");
 
-        // intent which allows using the camera to capture a new photo
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        // intent which wraps the above intents into a single chooser
+        // intent which wraps the others into a single chooser
         Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent, cameraIntent});
+
+        // if the device has a camera, also include the ability to take a photo
+        if (MainActivity.hasCamera) {
+            // intent which allows using the camera to capture a new photo
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent, cameraIntent});
+        }
+        else {
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+        }
 
         startActivityForResult(chooserIntent, PICK_IMAGE);
     }
@@ -262,7 +270,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             }
 
             // new image file name is generated based on the current time
-            tmpImg = System.currentTimeMillis() + ".jpg";
+            tmpImg = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg";
             File tmpFlavorImgFile = new File(getApplicationContext().getFilesDir(), tmpImg);
             try {
                 Bitmap bitmap;

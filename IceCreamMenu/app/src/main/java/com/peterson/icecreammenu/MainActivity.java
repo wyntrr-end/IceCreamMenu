@@ -1,6 +1,7 @@
 package com.peterson.icecreammenu;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +46,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static Boolean TESTING = true;
     public static Boolean isAdmin = true;
+    public static Boolean hasCamera = false;
     public static Boolean INIT = true;
     public static Boolean isGridView = false;
     public static int ADD_MODE = 1;
@@ -82,12 +84,16 @@ public class MainActivity extends AppCompatActivity {
         gelatoAdapter = new MyAdapter(this, gelatoFlavorList);
         recyclerView.setAdapter(iceCreamAdapter);
 
-        // load sample flavor information only if the app is being initialised
+        // load sample flavor information and check for an available camera
+        // if the app is being initialised
         // ============================ WARNING ==============================
         // INIT will be true every time the app is launched
         // ===================================================================
         Log.d("INIT", "INIT = " + INIT);
-        if (INIT) loadSampleInfo();
+        if (INIT) {
+            loadSampleInfo();
+            hasCamera = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+        }
 
         // allow toggling admin/user version when testing
         Switch switchAdmin = findViewById(R.id.switchAdmin);
