@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,14 +26,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton btnAddNewFlavor;
     private ImageButton btnListView;
-    private ImageButton btnGridView;
+    private ImageButton btnViewMode;
 
     private List<FlavorItem> iceCreamFlavorList;
     private List<FlavorItem> gelatoFlavorList;
@@ -122,27 +116,13 @@ public class MainActivity extends AppCompatActivity {
             btnLoadSampleData.setVisibility(View.GONE);
         }
 
-        // switch to list view when tapping on btnListView
-        btnListView = findViewById(R.id.btnListView);
-        btnListView.setOnClickListener(new View.OnClickListener() {
+        // toggle grid view when tapping on btnViewMode
+        btnViewMode = findViewById(R.id.btnViewMode);
+        btnViewMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isGridView) {
-                    isGridView = false;
-                    updateViewType();
-                }
-            }
-        });
-
-        // switch to grid view when tapping on btnGridView
-        btnGridView = findViewById(R.id.btnGridView);
-        btnGridView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!isGridView) {
-                    isGridView = true;
-                    updateViewType();
-                }
+                isGridView = !isGridView;
+                updateViewType();
             }
         });
 
@@ -207,16 +187,11 @@ public class MainActivity extends AppCompatActivity {
     // deals with switching view modes between list and grid view
     // ---------------------------------------------------------------------------------------------
     private void updateViewType() {
-        // make sure the interface buttons are yellow when active and grey when not active
-        btnListView.setImageResource(
-                isGridView ?
-                        R.drawable.ic_view_list_grey_24dp :
-                        R.drawable.ic_view_list_yellow_24dp
-        );
-        btnGridView.setImageResource(
+        // make sure the interface button displays the correct icon
+        btnViewMode.setImageResource(
                 isGridView ?
                         R.drawable.ic_view_module_yellow_24dp :
-                        R.drawable.ic_view_module_grey_24dp
+                        R.drawable.ic_view_list_yellow_24dp
         );
 
         // save the current adapter for later
@@ -229,13 +204,6 @@ public class MainActivity extends AppCompatActivity {
         );
         // reset the adapter to refresh the layout
         recyclerView.setAdapter(mAdapter);
-
-        // notify the user which view mode we are now in
-        Toast.makeText(
-                getApplicationContext(),
-                (isGridView ? "View by Case" : "View Alphabetically"),
-                Toast.LENGTH_SHORT
-        ).show();
     }
 
     // ---------------------------------------------------------------------------------------------

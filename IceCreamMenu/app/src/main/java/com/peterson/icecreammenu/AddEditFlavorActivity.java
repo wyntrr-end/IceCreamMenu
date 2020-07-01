@@ -44,6 +44,8 @@ import java.util.Objects;
 public class AddEditFlavorActivity extends AppCompatActivity {
     public static final int PICK_IMAGE = 1;
 
+    // TODO -- make the interface scrollable
+
     ImageButton btnAddImage;
     EditText txtFlavorName;
     Spinner flavorType;
