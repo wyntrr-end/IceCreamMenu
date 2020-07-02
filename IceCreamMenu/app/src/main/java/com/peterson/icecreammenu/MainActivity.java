@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,18 +45,15 @@ public class MainActivity extends AppCompatActivity {
     public static Boolean hasCamera = false;
     public static Boolean INIT = true;
     public static Boolean isGridView = false;
-    public static int ADD_MODE = 1;
-    public static int EDIT_MODE = 2;
-    public static int AVAILABILITY_MODE = 3;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter iceCreamAdapter;
     private RecyclerView.Adapter gelatoAdapter;
 
+    private Toolbar toolbar;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton btnAddNewFlavor;
-    private ImageButton btnEditAvailableFlavors;
+    private FloatingActionButton btnEdit;
     private ImageButton btnViewMode;
 
     private List<FlavorItem> iceCreamFlavorList;
@@ -88,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
         if (INIT) {
             loadSampleInfo();
             hasCamera = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+        }
+
+        toolbar = findViewById(R.id.toolbarMain);
+        if (!isAdmin) {
+            toolbar.setTitle(R.string.main_header);
         }
 
         // allow toggling admin/user version when testing
@@ -152,28 +156,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // allow adding new flavors if the user is Admin
-        btnAddNewFlavor = findViewById(R.id.btnAddNewFlavor);
-        btnAddNewFlavor.setOnClickListener(new View.OnClickListener() {
+        // allow access to the edit activity if the user is Admin
+        btnEdit = findViewById(R.id.btnEdit);
+        btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchAddFlavorActivity(v);
+                launchEditActivity(v);
             }
         });
         if (!isAdmin) {
-            btnAddNewFlavor.hide();
-        }
-
-        // allow editing the available flavors list if the user is Admin
-        btnEditAvailableFlavors = findViewById(R.id.btnEditAvailableFlavors);
-        btnEditAvailableFlavors.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchEditFlavorAvailabilityActivity(v);
-            }
-        });
-        if (!isAdmin) {
-            btnEditAvailableFlavors.setVisibility(View.GONE);
+            btnEdit.hide();
         }
 
         // call the method to update the displayed content when the user performs
@@ -220,46 +212,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // launches EditFlavorListActivity
+    // launches EditActivity
     // ---------------------------------------------------------------------------------------------
-    private void launchEditFlavorAvailabilityActivity(View v) {
-        Intent intent = new Intent(this, EditFlavorAvailabilityActivity.class);
+    private void launchEditActivity(View v) {
+        Intent intent = new Intent(this, EditActivity.class);
         startActivityForResult(intent, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
-    // launches AddEditFlavorActivity in Add mode
-    // ---------------------------------------------------------------------------------------------
-    private void launchAddFlavorActivity(View v) {
-        Intent intent = new Intent(this, AddEditFlavorActivity.class);
-        intent.putExtra("MODE", ADD_MODE);
-        startActivityForResult(intent, 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // launches AddEditFlavorActivity in Edit mode, passing the name of the flavor to edit
-    // ---------------------------------------------------------------------------------------------
-    public void launchEditFlavorActivity(View v, String flavorName) {
-        Intent intent = new Intent(this, AddEditFlavorActivity.class);
-        intent.putExtra("MODE", EDIT_MODE);
-        intent.putExtra("OLD_NAME", flavorName);
-        startActivityForResult(intent, 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // deals with the result of AddEditFlavorActivity, adding/modifying the corresponding flavor
-    // or doing nothing if the activity was cancelled
+    // deals with the result of EditActivity, refreshing the view to show any changes in the data
     // ---------------------------------------------------------------------------------------------
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // if something has been changed, reload the content
-        if (resultCode == ADD_MODE || resultCode == EDIT_MODE) {
-            reloadContent();
-        }
-
-        // otherwise do nothing
+        reloadContent();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -311,11 +277,11 @@ public class MainActivity extends AppCompatActivity {
     private void toggleAdmin() {
         isAdmin = !isAdmin;
         if (isAdmin) {
-            btnAddNewFlavor.show();
-            btnEditAvailableFlavors.setVisibility(View.VISIBLE);
+            btnEdit.show();
+            toolbar.setTitle(R.string.main_header_admin);
         } else {
-            btnAddNewFlavor.hide();
-            btnEditAvailableFlavors.setVisibility(View.GONE);
+            btnEdit.hide();
+            toolbar.setTitle(R.string.main_header);
         }
     }
 
@@ -474,5 +440,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Toast.makeText(
+                getApplicationContext(),
+                "Loaded sample data",
+                Toast.LENGTH_SHORT
+        ).show();
     }
 }

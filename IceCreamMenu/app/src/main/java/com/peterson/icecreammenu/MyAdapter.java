@@ -63,24 +63,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         }
         holder.nameTextView.setText(flavor.getName());
         holder.descTextView.setText(flavor.getDescription());
-
-        // add an onClickListener to launch an appropriate instance of AddEditFlavorActivity
-        // in Edit mode if the user is Admin
-        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (MainActivity.isAdmin) {
-                    Log.d(
-                            "Adapter",
-                            "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
-                    );
-                    mMainActivity.launchEditFlavorActivity(
-                            mMainActivity.getCurrentFocus(),
-                            holder.nameTextView.getText().toString()
-                    );
-                }
-            }
-        });
     }
 
     // ---------------------------------------------------------------------------------------------

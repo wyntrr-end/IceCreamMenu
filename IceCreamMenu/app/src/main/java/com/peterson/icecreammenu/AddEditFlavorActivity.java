@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -29,7 +30,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +76,9 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_edit_flavor);
         Intent intent = getIntent();
 
+        // determine whether the activity is meant to add or edit a flavor
+        mode = intent.getIntExtra("MODE", EditActivity.ADD_MODE);
+
         btnAddImage = findViewById(R.id.btnAddImage);
         txtFlavorName = findViewById(R.id.txtFlavorName);
         flavorType = findViewById(R.id.spinnerFlavorType);
@@ -93,7 +96,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         rb8 = findViewById(R.id.rb8);
 
         // set up view elements
-        ImageButton buttonSave = findViewById(R.id.buttonSave);
+        ImageButton buttonSave = findViewById(R.id.btnSave);
         buttonSave.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 hideKeyboard(activity);
@@ -101,12 +104,23 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             }
         });
 
-        ImageButton buttonCancel = findViewById(R.id.buttonCancel);
+        ImageButton buttonCancel = findViewById(R.id.btnBack);
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cancel();
             }
         });
+
+        Button btnDelete = findViewById(R.id.btnDelete);
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                delete();
+            }
+        });
+        if (mode == EditActivity.ADD_MODE) {
+            btnDelete.setVisibility(View.GONE);
+        }
 
         btnAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,11 +187,9 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         rb7.setOnCheckedChangeListener(radioGroupListener);
         rb8.setOnCheckedChangeListener(radioGroupListener);
 
-        // determine whether the activity is meant to add or edit a flavor
-        // and set the title and text boxes appropriately
-        mode = intent.getIntExtra("MODE", MainActivity.ADD_MODE);
-        Toolbar toolbar = findViewById(R.id.toolbar2);
-        if (mode == MainActivity.ADD_MODE) {
+        // set the title and text boxes appropriately
+        Toolbar toolbar = findViewById(R.id.toolbarAddEditFlavor);
+        if (mode == EditActivity.ADD_MODE) {
             toolbar.setTitle(R.string.add_flavor_header);
         } else {
             oldName = intent.getStringExtra("OLD_NAME");
@@ -391,7 +403,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 //        JSONObject jsonCases = JSONFileHandler.readJsonObjectFromFile(caseFile);
 
         // if we're in edit mode, remove the old flavor and clear the old slot
-        if (mode == MainActivity.EDIT_MODE) {
+        if (mode == EditActivity.EDIT_MODE) {
             jsonAllFlavors.remove(oldName);
             // if the image has been changed, remove the old image file
             if (imgChanged) {
@@ -446,6 +458,22 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         // return to MainActivity
         Intent intent = new Intent();
         setResult(mode, intent);
+        finishAfterTransition();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // deletes the current flavor and returns to MainActivity
+    // ---------------------------------------------------------------------------------------------
+    private void delete() {
+//        // make sure to delete any image files before cancelling
+//        boolean deleted = new File(getApplicationContext().getFilesDir(), tmpImg).delete();
+//        Log.d("Image", "Temp image deleted = " + deleted);
+//        deleted = new File(getApplicationContext().getFilesDir(), oldImg).delete();
+//        Log.d("Image", "Old image deleted = " + deleted);
+
+        // TODO -- deal with other deletion processes
+
+        setResult(0);
         finishAfterTransition();
     }
 

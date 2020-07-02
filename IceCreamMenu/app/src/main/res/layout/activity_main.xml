@@ -17,14 +17,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbarMain"
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:layout_weight="1"
             android:background="?attr/colorPrimary"
             android:elevation="0dp"
             android:theme="?attr/actionBarTheme"
-            app:title="@string/main_header"
+            app:title="@string/main_header_admin"
             app:titleTextColor="@color/colorAccent" />
 
         <Switch
@@ -33,16 +33,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="admin" />
-
-        <ImageButton
-            android:id="@+id/btnEditAvailableFlavors"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="0"
-            android:background="?attr/actionBarItemBackground"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_edit_yellow_24dp" />
 
         <ImageButton
             android:id="@+id/btnViewMode"
@@ -95,17 +85,18 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnAddNewFlavor"
+        android:id="@+id/btnEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:elevation="4dp"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_add_purple_24dp"
-        android:focusable="true" />
+        app:maxImageSize="30dp"
+        app:srcCompat="@drawable/ic_edit_purple_36dp" />
 
     <Button
         android:id="@+id/btnLoadData"

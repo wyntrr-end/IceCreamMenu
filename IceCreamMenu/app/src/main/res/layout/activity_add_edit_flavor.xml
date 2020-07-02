@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/buttonCancel"
+            android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -27,7 +27,7 @@
             app:srcCompat="@drawable/ic_close_yellow_24dp" />
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar2"
+            android:id="@+id/toolbarAddEditFlavor"
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:layout_weight="2"
@@ -38,7 +38,7 @@
             app:titleTextColor="@color/colorAccent" />
 
         <ImageButton
-            android:id="@+id/buttonSave"
+            android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -54,6 +54,14 @@
         android:layout_margin="20dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/toolbar2Layout">
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:backgroundTint="#DDDDDD"
+            android:text="@string/delete_flavor"
+            android:textColor="#FF1100" />
 
         <ImageButton
             android:id="@+id/btnAddImage"
