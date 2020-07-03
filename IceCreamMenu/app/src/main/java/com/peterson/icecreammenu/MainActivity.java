@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
@@ -40,21 +41,28 @@ import java.util.List;
 // MainActivity
 // =================================================================================================
 public class MainActivity extends AppCompatActivity {
-    public static Boolean TESTING = true;
-    public static Boolean isAdmin = true;
+    public static final Boolean TESTING = true;
     public static Boolean hasCamera = false;
+    public static Boolean isAdmin = true;
     public static Boolean INIT = true;
-    public static Boolean isGridView = false;
+    public static final int VIEW_LIST = 0;
+    public static final int VIEW_GRID = 1;
+    public static final int VIEW_EDIT = 2;
+    private int viewMode = VIEW_LIST;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter iceCreamAdapter;
     private RecyclerView.Adapter gelatoAdapter;
 
+    private ImageButton btnBack;
     private Toolbar toolbar;
+    private ImageButton btnEdit;
+    private Switch switchAdmin;
+    private ImageButton btnViewMode;
+    private TextView txtAutosave;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton btnEdit;
-    private ImageButton btnViewMode;
+    private FloatingActionButton btnAddFlavor;
 
     private List<FlavorItem> iceCreamFlavorList;
     private List<FlavorItem> gelatoFlavorList;
@@ -89,13 +97,35 @@ public class MainActivity extends AppCompatActivity {
             hasCamera = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
         }
 
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewMode = VIEW_LIST;
+                updateViewType();
+            }
+        });
+        btnBack.setVisibility(View.GONE);
+
         toolbar = findViewById(R.id.toolbarMain);
         if (!isAdmin) {
             toolbar.setTitle(R.string.main_header);
         }
 
+        btnEdit = findViewById(R.id.btnEdit);
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewMode = VIEW_EDIT;
+                updateViewType();
+            }
+        });
+        if (!isAdmin) {
+            btnEdit.setVisibility(View.GONE);
+        }
+
         // allow toggling admin/user version when testing
-        Switch switchAdmin = findViewById(R.id.switchAdmin);
+        switchAdmin = findViewById(R.id.switchAdmin);
         switchAdmin.setChecked(isAdmin);
         if (TESTING) {
             switchAdmin.setOnClickListener(new View.OnClickListener() {
@@ -108,28 +138,17 @@ public class MainActivity extends AppCompatActivity {
             switchAdmin.setVisibility(View.GONE);
         }
 
-        Button btnLoadSampleData = findViewById(R.id.btnLoadData);
-        if (TESTING) {
-            btnLoadSampleData.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    loadSampleInfo();
-                    reloadContent();
-                }
-            });
-        } else {
-            btnLoadSampleData.setVisibility(View.GONE);
-        }
-
         // toggle grid view when tapping on btnViewMode
         btnViewMode = findViewById(R.id.btnViewMode);
         btnViewMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                isGridView = !isGridView;
+                viewMode = (viewMode + 1) % 2;
                 updateViewType();
             }
         });
+
+        txtAutosave = findViewById(R.id.txtAutosave);
 
         // changing tabs switches the recyclerView adapter in order to
         // display appropriate information
@@ -156,18 +175,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // allow access to the edit activity if the user is Admin
-        btnEdit = findViewById(R.id.btnEdit);
-        btnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchEditActivity(v);
-            }
-        });
-        if (!isAdmin) {
-            btnEdit.hide();
-        }
-
         // call the method to update the displayed content when the user performs
         // a swipe-to-refresh gesture
         swipeRefreshLayout = findViewById(R.id.swiperefresh);
@@ -181,6 +188,29 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        // allow the user to reload all the sample data if in testing
+        Button btnLoadSampleData = findViewById(R.id.btnLoadData);
+        if (TESTING) {
+            btnLoadSampleData.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    loadSampleInfo();
+                    reloadContent();
+                }
+            });
+        } else {
+            btnLoadSampleData.setVisibility(View.GONE);
+        }
+
+        // set up a button to add a new flavor
+        btnAddFlavor = findViewById(R.id.btnAddFlavor);
+        btnAddFlavor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchAddFlavorActivity(v);
+            }
+        });
+
         // make sure the recyclerView loads properly
         updateViewType();
         if (!INIT) reloadContent();
@@ -189,43 +219,86 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // deals with switching view modes between list and grid view
+    // deals with switching modes between list, grid, and edit view
     // ---------------------------------------------------------------------------------------------
     private void updateViewType() {
-        // make sure the interface button displays the correct icon
-        btnViewMode.setImageResource(
-                isGridView ?
-                        R.drawable.ic_view_module_yellow_24dp :
-                        R.drawable.ic_view_list_yellow_24dp
-        );
+        // make sure the interface button displays the correct icon, and hide it
+        // when in admin edit mode
+        if (viewMode == VIEW_GRID) {
+            btnViewMode.setImageResource(R.drawable.ic_view_module_yellow_24dp);
+        } else if (viewMode == VIEW_LIST){
+            btnViewMode.setImageResource(R.drawable.ic_view_list_yellow_24dp);
+        } else {
+            btnViewMode.setVisibility(View.GONE);
+        }
 
-        // save the current adapter for later
-        RecyclerView.Adapter mAdapter = recyclerView.getAdapter();
+        // show/hide certian buttons in admin edit mode
+        if (viewMode == VIEW_EDIT) {
+            btnBack.setVisibility(View.VISIBLE);
+            toolbar.setTitle(R.string.admin_edit_mode_header);
+            switchAdmin.setVisibility(View.GONE);
+            btnEdit.setVisibility(View.GONE);
+            txtAutosave.setVisibility(View.VISIBLE);
+            btnAddFlavor.show();
+        } else {
+            btnBack.setVisibility(View.GONE);
+            if (isAdmin) toolbar.setTitle(R.string.main_header_admin);
+            else toolbar.setTitle(R.string.main_header);
+            switchAdmin.setVisibility(View.VISIBLE);
+            btnEdit.setVisibility(View.VISIBLE);
+            btnViewMode.setVisibility(View.VISIBLE);
+            txtAutosave.setVisibility(View.GONE);
+            btnAddFlavor.hide();
+        }
+
+        // get the current adapter and update the view mode
+        MyAdapter mAdapter = (MyAdapter) recyclerView.getAdapter();
+        mAdapter.setViewMode(viewMode); // TODO -- does this actually change anything?
+
         // set the layout manager according to the current view mode
-        recyclerView.setLayoutManager(
-                isGridView ?
-                        new GridLayoutManager(this, 4) :
-                        new LinearLayoutManager(this)
-        );
+        if (viewMode == VIEW_GRID) {
+            recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
+        } else {
+            // both VIEW_LIST and VIEW_EDIT use a linear layout manager
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        }
         // reset the adapter to refresh the layout
         recyclerView.setAdapter(mAdapter);
     }
 
     // ---------------------------------------------------------------------------------------------
-    // launches EditActivity
+    // launches AddEditFlavorActivity in Add mode
     // ---------------------------------------------------------------------------------------------
-    private void launchEditActivity(View v) {
-        Intent intent = new Intent(this, EditActivity.class);
+    private void launchAddFlavorActivity(View v) {
+        Intent intent = new Intent(this, AddEditFlavorActivity.class);
+        intent.putExtra("MODE", AddEditFlavorActivity.ADD_MODE);
         startActivityForResult(intent, 1);
     }
 
     // ---------------------------------------------------------------------------------------------
-    // deals with the result of EditActivity, refreshing the view to show any changes in the data
+    // launches AddEditFlavorActivity in Edit mode, passing the name of the flavor to edit
+    // ---------------------------------------------------------------------------------------------
+    public void launchEditFlavorActivity(View v, String flavorName) {
+        Intent intent = new Intent(this, AddEditFlavorActivity.class);
+        intent.putExtra("MODE", AddEditFlavorActivity.EDIT_MODE);
+        intent.putExtra("OLD_NAME", flavorName);
+        startActivityForResult(intent, 1);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // deals with the result of AddEditFlavorActivity, adding/modifying the corresponding flavor
+    // or doing nothing if the activity was cancelled
     // ---------------------------------------------------------------------------------------------
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        reloadContent();
+
+        // if something has been changed, reload the content
+        if (resultCode == AddEditFlavorActivity.ADD_MODE || resultCode == AddEditFlavorActivity.EDIT_MODE) {
+            reloadContent();
+        }
+
+        // otherwise do nothing
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -277,10 +350,10 @@ public class MainActivity extends AppCompatActivity {
     private void toggleAdmin() {
         isAdmin = !isAdmin;
         if (isAdmin) {
-            btnEdit.show();
+            btnEdit.setVisibility(View.VISIBLE);
             toolbar.setTitle(R.string.main_header_admin);
         } else {
-            btnEdit.hide();
+            btnEdit.setVisibility(View.GONE);
             toolbar.setTitle(R.string.main_header);
         }
     }

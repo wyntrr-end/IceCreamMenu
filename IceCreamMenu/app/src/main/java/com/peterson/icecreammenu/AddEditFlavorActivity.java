@@ -42,6 +42,8 @@ import java.util.Objects;
 // activity to manage adding new flavors or editing existing flavors
 // =================================================================================================
 public class AddEditFlavorActivity extends AppCompatActivity {
+    public static final int ADD_MODE = 1;
+    public static final int EDIT_MODE = 2;
     public static final int PICK_IMAGE = 1;
 
     // TODO -- make the interface scrollable
@@ -77,7 +79,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         // determine whether the activity is meant to add or edit a flavor
-        mode = intent.getIntExtra("MODE", EditActivity.ADD_MODE);
+        mode = intent.getIntExtra("MODE", ADD_MODE);
 
         btnAddImage = findViewById(R.id.btnAddImage);
         txtFlavorName = findViewById(R.id.txtFlavorName);
@@ -96,16 +98,16 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         rb8 = findViewById(R.id.rb8);
 
         // set up view elements
-        ImageButton buttonSave = findViewById(R.id.btnSave);
-        buttonSave.setOnClickListener(new View.OnClickListener() {
+        ImageButton btnSave = findViewById(R.id.btnSave);
+        btnSave.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 hideKeyboard(activity);
                 save();
             }
         });
 
-        ImageButton buttonCancel = findViewById(R.id.btnBack);
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
+        ImageButton btnCancel = findViewById(R.id.btnBack2);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cancel();
             }
@@ -118,7 +120,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
                 delete();
             }
         });
-        if (mode == EditActivity.ADD_MODE) {
+        if (mode == ADD_MODE) {
             btnDelete.setVisibility(View.GONE);
         }
 
@@ -158,7 +160,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().equals("")) {
-                    panelSlot.setVisibility(View.INVISIBLE);
+                    panelSlot.setVisibility(View.GONE);
                     uncheckAll();
                 } else {
                     panelSlot.setVisibility(View.VISIBLE);
@@ -189,7 +191,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 
         // set the title and text boxes appropriately
         Toolbar toolbar = findViewById(R.id.toolbarAddEditFlavor);
-        if (mode == EditActivity.ADD_MODE) {
+        if (mode == ADD_MODE) {
             toolbar.setTitle(R.string.add_flavor_header);
         } else {
             oldName = intent.getStringExtra("OLD_NAME");
@@ -403,7 +405,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 //        JSONObject jsonCases = JSONFileHandler.readJsonObjectFromFile(caseFile);
 
         // if we're in edit mode, remove the old flavor and clear the old slot
-        if (mode == EditActivity.EDIT_MODE) {
+        if (mode == EDIT_MODE) {
             jsonAllFlavors.remove(oldName);
             // if the image has been changed, remove the old image file
             if (imgChanged) {

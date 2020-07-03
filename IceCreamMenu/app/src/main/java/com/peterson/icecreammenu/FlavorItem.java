@@ -40,7 +40,7 @@ public class FlavorItem implements Comparable<FlavorItem> {
         return description;
     }
 
-    public Boolean getAvailability() {
+    public Boolean isAvailable() {
         return available;
     }
     public void setAvailability(Boolean newAvail) {

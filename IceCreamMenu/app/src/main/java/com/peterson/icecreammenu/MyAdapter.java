@@ -5,10 +5,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
@@ -20,6 +23,7 @@ import java.util.List;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     private List<FlavorItem> mFlavorItemList;
     private MainActivity mMainActivity;
+    private int viewMode = MainActivity.VIEW_LIST;
 
     // ---------------------------------------------------------------------------------------------
     // basic constructor
@@ -34,12 +38,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // ---------------------------------------------------------------------------------------------
     @Override
     public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view using the appropriate layout (grid or list layout)
-        View v = LayoutInflater.from(parent.getContext()).inflate((
-                MainActivity.isGridView ?
-                        R.layout.recycler_grid_item :
-                        R.layout.recycler_list_item
-        ), parent, false);
+        // create a new view using the appropriate layout (grid, list, or edit list layout)
+        int layout;
+        if (viewMode == MainActivity.VIEW_GRID) {
+            layout = R.layout.recycler_grid_item;
+        } else if (viewMode == MainActivity.VIEW_EDIT) {
+            layout = R.layout.recycler_list_edit_item;
+        } else {
+            layout = R.layout.recycler_list_item;
+        }
+        View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new FlavorHolder(v);
     }
 
@@ -63,6 +71,47 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         }
         holder.nameTextView.setText(flavor.getName());
         holder.descTextView.setText(flavor.getDescription());
+
+        // if we're in admin edit mode, set additional functionality
+        if (viewMode == MainActivity.VIEW_EDIT) {
+
+            //set the availability checkbox appropriately
+            holder.chAvailable.setChecked(flavor.isAvailable());
+            if (!flavor.isAvailable()) {
+                holder.linearLayout.setBackgroundColor(ContextCompat.getColor(
+                        mMainActivity.getApplicationContext(),
+                        R.color.colorDeselected
+                ));
+            }
+
+            // when the item is clicked, toggle the availability
+            holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO -- deal with toggling and saving the availability
+                    holder.linearLayout.setBackgroundColor(ContextCompat.getColor(
+                            mMainActivity.getApplicationContext(),
+                            R.color.colorSelected
+                    ));
+                }
+            });
+
+            // when the edit button is clicked, launch EditFlavorActivity
+            if (holder.btnEditItem != null)
+                holder.btnEditItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.d(
+                                "Adapter",
+                                "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
+                        );
+                        mMainActivity.launchEditFlavorActivity(
+                                mMainActivity.getCurrentFocus(),
+                                holder.nameTextView.getText().toString()
+                        );
+                    }
+                });
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -81,6 +130,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         ImageView imageView;
         TextView nameTextView;
         TextView descTextView;
+        CheckBox chAvailable;
+        ImageButton btnEditItem;
 
         FlavorHolder(View itemView) {
             super(itemView);
@@ -88,6 +139,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
             imageView = itemView.findViewById(R.id.rvImage);
             nameTextView = itemView.findViewById(R.id.rvName);
             descTextView = itemView.findViewById(R.id.rvDesc);
+            chAvailable = itemView.findViewById(R.id.chAvailable);
+            btnEditItem = itemView.findViewById(R.id.btnEditItem);
         }
+    }
+
+    public void setViewMode(int newMode) {
+        viewMode = newMode;
     }
 }

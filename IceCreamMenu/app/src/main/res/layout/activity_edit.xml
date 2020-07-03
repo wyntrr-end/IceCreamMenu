@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/btnBack"
+            android:id="@+id/btnBack2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -33,7 +33,7 @@
             android:background="?attr/colorPrimary"
             android:elevation="0dp"
             android:theme="?attr/actionBarTheme"
-            app:title="@string/edit_activity_header"
+            app:title="@string/admin_edit_mode_header"
             app:titleTextColor="@color/colorAccent" />
 
     </LinearLayout>

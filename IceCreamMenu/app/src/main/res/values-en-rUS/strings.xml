@@ -4,7 +4,7 @@
     <string name="main_header">Today\'s Flavors</string>
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
-    <string name="edit_activity_header">Edit Flavors and Availability</string>
+    <string name="admin_edit_mode_header">Edit Flavors and Availability</string>
     <string name="autosave_description">Changes on this page are automatically saved.</string>
     <string name="add_flavor_header">Add New Flavor</string>
     <string name="edit_flavor_header">Edit Flavor</string>
