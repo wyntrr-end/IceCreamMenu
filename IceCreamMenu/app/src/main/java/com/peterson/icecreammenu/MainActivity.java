@@ -51,14 +51,15 @@ public class MainActivity extends AppCompatActivity {
     private int viewMode = VIEW_LIST;
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter iceCreamAdapter;
-    private RecyclerView.Adapter gelatoAdapter;
+    private MyAdapter iceCreamAdapter;
+    private MyAdapter gelatoAdapter;
 
     private ImageButton btnBack;
     private Toolbar toolbar;
     private ImageButton btnEdit;
     private Switch switchAdmin;
     private ImageButton btnViewMode;
+    private TextView txtExplanation;
     private TextView txtAutosave;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        txtExplanation = findViewById(R.id.txtExplanation);
         txtAutosave = findViewById(R.id.txtAutosave);
 
         // changing tabs switches the recyclerView adapter in order to
@@ -184,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onRefresh() {
                         Log.i("Refresh", "onRefresh called from SwipeRefreshLayout");
                         reloadContent();
+                        updateViewType();
                     }
                 }
         );
@@ -207,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         btnAddFlavor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchAddFlavorActivity(v);
+                launchAddFlavorActivity();
             }
         });
 
@@ -238,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
             toolbar.setTitle(R.string.admin_edit_mode_header);
             switchAdmin.setVisibility(View.GONE);
             btnEdit.setVisibility(View.GONE);
+            txtExplanation.setVisibility(View.VISIBLE);
             txtAutosave.setVisibility(View.VISIBLE);
             btnAddFlavor.show();
         } else {
@@ -247,13 +251,15 @@ public class MainActivity extends AppCompatActivity {
             switchAdmin.setVisibility(View.VISIBLE);
             btnEdit.setVisibility(View.VISIBLE);
             btnViewMode.setVisibility(View.VISIBLE);
+            txtExplanation.setVisibility(View.GONE);
             txtAutosave.setVisibility(View.GONE);
             btnAddFlavor.hide();
         }
 
-        // get the current adapter and update the view mode
+        // update the view mode and get the current adapter
+        iceCreamAdapter.setViewMode(viewMode);
+        gelatoAdapter.setViewMode(viewMode);
         MyAdapter mAdapter = (MyAdapter) recyclerView.getAdapter();
-        mAdapter.setViewMode(viewMode); // TODO -- does this actually change anything?
 
         // set the layout manager according to the current view mode
         if (viewMode == VIEW_GRID) {
@@ -269,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     // launches AddEditFlavorActivity in Add mode
     // ---------------------------------------------------------------------------------------------
-    private void launchAddFlavorActivity(View v) {
+    private void launchAddFlavorActivity() {
         Intent intent = new Intent(this, AddEditFlavorActivity.class);
         intent.putExtra("MODE", AddEditFlavorActivity.ADD_MODE);
         startActivityForResult(intent, 1);
@@ -278,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     // launches AddEditFlavorActivity in Edit mode, passing the name of the flavor to edit
     // ---------------------------------------------------------------------------------------------
-    public void launchEditFlavorActivity(View v, String flavorName) {
+    public void launchEditFlavorActivity(String flavorName) {
         Intent intent = new Intent(this, AddEditFlavorActivity.class);
         intent.putExtra("MODE", AddEditFlavorActivity.EDIT_MODE);
         intent.putExtra("OLD_NAME", flavorName);
@@ -306,32 +312,37 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     private void addFlavor(JSONObject jsonFlavor) {
         String name = "";
-        String type = "";
+        int type = 0;
         String desc = "";
         String img = "";
+        boolean avail = false;
 
         // get the fields from the JSONObject
         try {
-            name = jsonFlavor.getString("NAME");
-            type = jsonFlavor.getString("TYPE");
-            desc = jsonFlavor.getString("DESC");
             img = jsonFlavor.getString("IMG");
+            name = jsonFlavor.getString("NAME");
+            type = jsonFlavor.getInt("TYPE");
+            desc = jsonFlavor.getString("DESC");
+            avail = jsonFlavor.getBoolean("AVAIL");
         } catch (org.json.JSONException e) {
             Log.e("JSON", "Error parsing JSON flavor in addFlavor()");
             e.printStackTrace();
         }
 
         // if the name or type fields are blank, do nothing
-        if (name.equals("") || type.equals("")) return;
+        if (name.equals("") || type == 0) return;
+
+        FlavorItem newFlavor = new FlavorItem(img, name, type, desc);
+        newFlavor.setAvailability(avail);
 
         // add the new flavor to the corresponding list of flavors, re-sort the list,
         // and refresh the adapter
-        if (type.equals("Ice Cream")) {
-            iceCreamFlavorList.add(new FlavorItem(img, name, desc));
+        if (type == FlavorItem.ICE_CREAM) {
+            iceCreamFlavorList.add(newFlavor);
             Collections.sort(iceCreamFlavorList);
             iceCreamAdapter.notifyDataSetChanged();
         } else {
-            gelatoFlavorList.add(new FlavorItem(img, name, desc));
+            gelatoFlavorList.add(newFlavor);
             Collections.sort(gelatoFlavorList);
             gelatoAdapter.notifyDataSetChanged();
         }
@@ -363,8 +374,8 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     private void reloadContent() {
         // read in the "flavors.json" file and get an array of the contained flavor names
-        File f = new File(getApplicationContext().getFilesDir(), "flavors.json");
-        JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(f);
+        File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
+        JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
         JSONArray jsonNames = jsonFlavors.names();
 
         // make sure there are names in the jsonFlavors object
@@ -383,14 +394,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // remember the old lists in case something fails
-        List<FlavorItem> oldIceCreams = new ArrayList<>();
-        for (FlavorItem item : iceCreamFlavorList) {
-            oldIceCreams.add(item);
-        }
-        List<FlavorItem> oldGelatos = new ArrayList<>();
-        for (FlavorItem item : gelatoFlavorList) {
-            oldGelatos.add(item);
-        }
+        List<FlavorItem> oldIceCreams = new ArrayList<>(iceCreamFlavorList);
+        List<FlavorItem> oldGelatos = new ArrayList<>(gelatoFlavorList);
+
         // clear the flavor lists so they can be rebuilt
         iceCreamFlavorList.clear();
         gelatoFlavorList.clear();
@@ -411,12 +417,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("JSON", "Error reloading flavors from json file");
                 iceCreamFlavorList.clear();
                 gelatoFlavorList.clear();
-                for (FlavorItem item : oldIceCreams) {
-                    iceCreamFlavorList.add(item);
-                }
-                for (FlavorItem item : oldGelatos) {
-                    gelatoFlavorList.add(item);
-                }
+                iceCreamFlavorList.addAll(oldIceCreams);
+                gelatoFlavorList.addAll(oldGelatos);
                 e.printStackTrace();
                 break;
             }
@@ -443,13 +445,13 @@ public class MainActivity extends AppCompatActivity {
         // list, in addition to adding it to jsonAllFlavors
         for (String name : mFlavorNameArray) {
             String desc = "description of " + name + " goes here";
-            String type = "";
+            int type;
             if (name.contains("Sorbet")) {
-                type = "Sorbet";
+                type = FlavorItem.SORBET;
             } else if (name.contains("Gelato")) {
-                type = "Gelato";
+                type = FlavorItem.GELATO;
             } else {
-                type = "Ice Cream";
+                type = FlavorItem.ICE_CREAM;
             }
 
             // find the appropriate drawable based on the flavor name and copy it to the app files
@@ -488,12 +490,11 @@ public class MainActivity extends AppCompatActivity {
             // using the flavor name as the object name
             JSONObject jsonFlavor = new JSONObject();
             try {
+                jsonFlavor.put("IMG", imgName);
                 jsonFlavor.put("NAME", name);
                 jsonFlavor.put("TYPE", type);
                 jsonFlavor.put("DESC", desc);
-                jsonFlavor.put("IMG", imgName);
-                jsonFlavor.put("CASE", "");
-                jsonFlavor.put("SLOT", "");
+                jsonFlavor.put("AVAIL", true);
                 Log.d("JSON", jsonFlavor.toString(2));
 
                 jsonAllFlavors.put(name, jsonFlavor);

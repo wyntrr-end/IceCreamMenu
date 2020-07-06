@@ -64,12 +64,13 @@ public class AddEditFlavorActivity extends AppCompatActivity {
     RadioButton rb8;
     int slotNo = 0;
     int mode;
+
     String oldImg = "";
     String tmpImg = "tmp.jpg";
     boolean imgChanged = false;
-    String oldName = "";
-    String oldCase = "";
-    int oldSlot = 0;
+
+    FlavorItem flavor;
+    FlavorItem oldFlavor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +143,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         flavorType.setAdapter(mAdapter);
 
         final LinearLayout panelSlot = findViewById(R.id.panelSlot);
-        //panelSlot.setVisibility(View.INVISIBLE); TODO -- uncomment this when done testing
+        panelSlot.setVisibility(View.INVISIBLE);
 
         // if no case # specified, don't show the slot panel, otherwise show it
         txtFlavorCaseNo.addTextChangedListener(new TextWatcher() {
@@ -193,55 +194,46 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbarAddEditFlavor);
         if (mode == ADD_MODE) {
             toolbar.setTitle(R.string.add_flavor_header);
+            oldFlavor = new FlavorItem();
         } else {
-            oldName = intent.getStringExtra("OLD_NAME");
+            String oldName = intent.getStringExtra("OLD_NAME");
             toolbar.setTitle(getString(R.string.edit_flavor_header) + ": " + oldName);
             populateFields(oldName);
         }
+
+        flavor = oldFlavor.clone();
     }
 
     // ---------------------------------------------------------------------------------------------
     // populate the text boxes with info from a given flavor (read from "flavors.json")
     // ---------------------------------------------------------------------------------------------
     private void populateFields(String name) {
+
         // read "flavors.json" into a JSONObject
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
-        try {
-            JSONObject jsonOldFlavor = jsonAllFlavors.getJSONObject(name);
-
-            // if an image name was provided previously, load and display that image, otherwise
-            // the placeholder icon will be shown by default
-            oldImg = jsonOldFlavor.getString("IMG");
-            if (!oldImg.equals("")) {
-                File flavorImgFile = new File(getApplicationContext().getFilesDir(), oldImg);
-                if (flavorImgFile.exists()) {
-                    btnAddImage.setImageURI(Uri.fromFile(flavorImgFile));
-                }
-            }
-
-            // set the name, description, and flavor type fields
-            txtFlavorName.setText(name);
-            txtFlavorDesc.setText(jsonOldFlavor.getString("DESC"));
-            switch (jsonOldFlavor.getString("TYPE")) {
-                case "Gelato" : flavorType.setSelection(2); break;
-                case  "Sorbet" : flavorType.setSelection(3); break;
-                default: flavorType.setSelection(1);
-            }
-
-            // if a case # was provided previously, set up the slot checkboxes appropriately
-            oldCase = jsonOldFlavor.getString("CASE");
-            txtFlavorCaseNo.setText(oldCase);
-            if (!oldCase.equals("")) {
-                checkButton(jsonOldFlavor.getInt("SLOT"));
-                oldSlot = slotNo;
-            }
-
-        } catch (org.json.JSONException e) {
-            Log.d("JSON", "Error getting from JSON object.");
-            e.printStackTrace();
+        oldFlavor = new FlavorItem();
+        if (!oldFlavor.readFromJSON(flavorFile, name)) {
+            Log.e("AddEditActivity", "Unable to read flavor.");
         }
+
+        // if an image name was provided previously, load and display that image, otherwise
+        // the placeholder icon will be shown by default
+        String oldName = oldFlavor.getImgName();
+        if (!oldName.equals("")) {
+            File flavorImgFile = new File(getApplicationContext().getFilesDir(), oldName);
+            if (flavorImgFile.exists()) {
+                btnAddImage.setImageURI(Uri.fromFile(flavorImgFile));
+            }
+        }
+
+        // set the name, description, and flavor type fields
+        txtFlavorName.setText(name);
+        flavorType.setSelection(oldFlavor.getType());
+        txtFlavorDesc.setText(oldFlavor.getDescription());
+
+        return;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -396,66 +388,27 @@ public class AddEditFlavorActivity extends AppCompatActivity {
             return;
         }
 
-        // if required fields are good, convert the provided data into a JSONObject and save to file
-
-        // read "flavors.json" into a JSONObject
+        // if required fields are good save the new/edited flavor to file
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
-        JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
-//        File caseFile = new File(getApplicationContext().getFilesDir(), "cases.json");
-//        JSONObject jsonCases = JSONFileHandler.readJsonObjectFromFile(caseFile);
-
-        // if we're in edit mode, remove the old flavor and clear the old slot
-        if (mode == EDIT_MODE) {
-            jsonAllFlavors.remove(oldName);
-            // if the image has been changed, remove the old image file
-            if (imgChanged) {
-                boolean deleted = new File(getApplicationContext().getFilesDir(), oldImg).delete();
-                Log.d("Image", "Old image deleted = " + deleted);
+        switch (flavor.writeToJSON(flavorFile)) {
+            case FlavorItem.DUPLICATE: {
+                // if this flavor name has already been used, show an error message and don't save
+                Toast.makeText(
+                        getApplicationContext(),
+                        R.string.flavor_duplicate_error_msg,
+                        Toast.LENGTH_LONG
+                ).show();
+                return;
             }
-//            if (!oldCase.equals("")) {
-//                try {
-//                    jsonCases.getJSONObject(txtFlavorCaseNo.toString()).put(
-//                            Integer.toString(slotNo),
-//                            ""
-//                    );
-//                } catch (JSONException e) {
-//                    Log.d("JSON", "Error putting to JSON object.");
-//                    e.printStackTrace();
-//                }
-//            }
+            case FlavorItem.SUCCESSFUL: break;
+            default: return; // some other error has occurred
+        };
+
+        // if in edit mode and the image has been changed, remove the old image file
+        if (mode == EDIT_MODE && imgChanged) {
+            boolean deleted = new File(getApplicationContext().getFilesDir(), oldImg).delete();
+            Log.d("Image", "Old image deleted = " + deleted);
         }
-
-        // if this flavor name has already been used, show error message and don't save
-        if (jsonAllFlavors.has(newName)) {
-            Toast.makeText(
-                    getApplicationContext(),
-                    R.string.flavor_duplicate_error_msg,
-                    Toast.LENGTH_LONG
-            ).show();
-            return;
-        }
-
-        // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
-        // using the flavor name as the object name
-        JSONObject jsonFlavor = new JSONObject();
-        try {
-            jsonFlavor.put("NAME", newName);
-            jsonFlavor.put("DESC", txtFlavorDesc.getText().toString());
-            jsonFlavor.put("TYPE", flavorType.getSelectedItem().toString());
-            jsonFlavor.put("IMG", imgChanged ? tmpImg : oldImg);
-            jsonFlavor.put("CASE", txtFlavorCaseNo.getText().toString());
-            jsonFlavor.put("SLOT", slotNo);
-            Log.d("JSON", jsonFlavor.toString(2));
-
-            jsonAllFlavors.put(txtFlavorName.getText().toString(), jsonFlavor);
-            //Log.d("JSON", jsonAllFlavors.toString(2));
-        } catch (JSONException e) {
-            Log.d("JSON", "Error putting to JSON object.");
-            e.printStackTrace();
-        }
-
-        // write the updated jsonAllFlavors to "flavors.json"
-        JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
 
         // return to MainActivity
         Intent intent = new Intent();

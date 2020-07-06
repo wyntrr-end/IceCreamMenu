@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
@@ -24,6 +23,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     private List<FlavorItem> mFlavorItemList;
     private MainActivity mMainActivity;
     private int viewMode = MainActivity.VIEW_LIST;
+    private File flavorFile;
 
     // ---------------------------------------------------------------------------------------------
     // basic constructor
@@ -31,6 +31,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     public MyAdapter(MainActivity mainActivity, List<FlavorItem> flavorItemList) {
         mMainActivity = mainActivity;
         mFlavorItemList = flavorItemList;
+        flavorFile = new File(mMainActivity.getApplicationContext().getFilesDir(), "flavors.json");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -55,12 +56,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // set the contents of a view (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
-    public void onBindViewHolder(final FlavorHolder holder, int position) {
+    public void onBindViewHolder(final FlavorHolder holder, final int position) {
         // get the FlavorItem at this position
-        final FlavorItem flavor = mFlavorItemList.get(position);
+        final FlavorItem flavor = new FlavorItem();
+        flavor.readFromJSON(flavorFile, mFlavorItemList.get(position).getName());
 
         // replace the contents of the view with values appropriate for that FlavorItem
-        String flavorImgName = flavor.getImageName();
+        String flavorImgName = flavor.getImgName();
         if (!flavorImgName.equals("")) {
             // if an image name is given, use that to set the image
             File flavorImg = new File(mMainActivity.getApplicationContext().getFilesDir(), flavorImgName);
@@ -77,22 +79,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
 
             //set the availability checkbox appropriately
             holder.chAvailable.setChecked(flavor.isAvailable());
-            if (!flavor.isAvailable()) {
-                holder.linearLayout.setBackgroundColor(ContextCompat.getColor(
-                        mMainActivity.getApplicationContext(),
-                        R.color.colorDeselected
-                ));
-            }
 
             // when the item is clicked, toggle the availability
             holder.linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // TODO -- deal with toggling and saving the availability
-                    holder.linearLayout.setBackgroundColor(ContextCompat.getColor(
-                            mMainActivity.getApplicationContext(),
-                            R.color.colorSelected
-                    ));
+                    holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
+                    flavor.setAvailability(holder.chAvailable.isChecked());
+                    mFlavorItemList.get(position).setAvailability(holder.chAvailable.isChecked());
+                    flavor.writeToJSON(flavorFile);
                 }
             });
 
@@ -105,12 +101,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                                 "Adapter",
                                 "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
                         );
-                        mMainActivity.launchEditFlavorActivity(
-                                mMainActivity.getCurrentFocus(),
-                                holder.nameTextView.getText().toString()
-                        );
+                        mMainActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
                     }
                 });
+        }
+        else {
+            if (flavor.isAvailable()) {
+                holder.itemView.setVisibility(View.VISIBLE);
+                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            } else {
+                holder.itemView.setVisibility(View.GONE);
+                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+            }
         }
     }
 

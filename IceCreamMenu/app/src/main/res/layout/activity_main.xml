@@ -72,11 +72,20 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/txtExplanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/checkbox_explanation"
+            android:textAlignment="center" />
+
+        <TextView
             android:id="@+id/txtAutosave"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/autosave_description" />
+            android:text="@string/autosave_description"
+            android:textAlignment="center" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

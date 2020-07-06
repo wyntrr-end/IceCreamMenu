@@ -23,6 +23,11 @@ public class JSONFileHandler {
     // returns a new, blank JSONObject if no such file is found
     // ---------------------------------------------------------------------------------------------
     public static JSONObject readJsonObjectFromFile(File file) {
+        if (file == null) {
+            Log.e("JSON", "No file passed to readJsonObjectFromFile.");
+            return new JSONObject();
+        }
+
         String jsonStr = "";
 
         try {

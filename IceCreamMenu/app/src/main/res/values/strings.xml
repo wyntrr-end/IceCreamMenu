@@ -8,6 +8,7 @@
 
     <string name="admin_edit_mode_header">Edit Flavors and Availability</string>
     <string name="autosave_description">Changes on this page are automatically saved.</string>
+    <string name="checkbox_explanation">Tap a flavor to toggle availability.</string>
 
     <string name="add_flavor_header">Add New Flavor</string>
     <string name="edit_flavor_header">Edit Flavor</string>

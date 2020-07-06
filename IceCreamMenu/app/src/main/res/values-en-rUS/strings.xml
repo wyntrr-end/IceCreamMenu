@@ -18,4 +18,5 @@
     <string name="app_name_short">IC Menu</string>
     <string name="delete_flavor">Delete This Flavor</string>
     <string name="main_header_admin">Today\'s Flavors (Admin)</string>
+    <string name="checkbox_explanation">Check a flavor to toggle availability.</string>
 </resources>
