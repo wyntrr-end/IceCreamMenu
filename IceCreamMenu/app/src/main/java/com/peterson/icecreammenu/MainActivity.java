@@ -299,8 +299,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // if something has been changed, reload the content
-        if (resultCode == AddEditFlavorActivity.ADD_MODE || resultCode == AddEditFlavorActivity.EDIT_MODE) {
+        // if the activity was not cancelled, reload the content
+        if (resultCode != AddEditFlavorActivity.CANCELLED) {
             reloadContent();
         }
 

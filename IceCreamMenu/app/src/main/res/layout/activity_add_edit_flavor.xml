@@ -58,7 +58,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:focusable="false"
+            android:focusableInTouchMode="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -97,95 +99,6 @@
                 android:hint="@string/add_flavor_desc_text"
                 android:inputType="textPersonName" />
 
-            <EditText
-                android:id="@+id/txtFlavorCaseNo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:ems="10"
-                android:hint="@string/add_flavor_case_no"
-                android:inputType="number" />
-
-            <LinearLayout
-                android:id="@+id/panelSlot"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/lblSlotDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="4dp"
-                    android:paddingTop="4dp"
-                    android:paddingEnd="4dp"
-                    android:text="@string/add_flavor_slot_desc"
-                    android:textColor="@color/colorFlavorDesc"
-                    android:textSize="18sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rb5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <RadioButton
-                        android:id="@+id/rb8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_flavor_slot_caption"
-                    android:textColor="@color/colorFlavorDesc" />
-            </LinearLayout>
-
             <Button
                 android:id="@+id/btnDelete"
                 android:layout_width="match_parent"
@@ -193,6 +106,11 @@
                 android:backgroundTint="#DDDDDD"
                 android:text="@string/delete_flavor"
                 android:textColor="#FF1100" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" />
 
         </LinearLayout>
     </ScrollView>

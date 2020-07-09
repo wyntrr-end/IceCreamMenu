@@ -125,7 +125,7 @@ public class FlavorItem implements Comparable<FlavorItem> {
         JSONObject jsonFlavor = new JSONObject();
         try {
             jsonFlavor = jsonAllFlavors.getJSONObject(flavorName);
-            Log.d("JSON", "Read in flavor \'" + flavorName + "\': " + jsonFlavor.toString(2));
+            Log.d("JSON", "Read in flavor \"" + flavorName + "\": " + jsonFlavor.toString(2));
 
             imgName = jsonFlavor.getString("IMG");
             name = flavorName;
@@ -186,5 +186,29 @@ public class FlavorItem implements Comparable<FlavorItem> {
         // write the updated jsonAllFlavors to "flavors.json"
         JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
         return SUCCESSFUL;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // delete the flavor corresponding to the given name from the given File, returning true if
+    // successful and false if no such flavor exists
+    // ---------------------------------------------------------------------------------------------
+    public static boolean deleteFromJSON(File flavorFile, String name) {
+        // read flavorFile into a JSONObject
+        JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
+
+        Log.d("JSON", "deleteFromJSON name = " + name);
+        // if jsonAllFlavors does not have the specified flavor, return false
+        if (!jsonAllFlavors.has(name)) {
+            Log.d("JSON", "deleteFromJSON could not delete item \'" + name + "\' because it does not exist.");
+            return false;
+        }
+
+        // remove the specified item from jsonAllFlavors and write the updated object
+        // to the given file
+        jsonAllFlavors.remove(name);
+        JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
+        Log.d("JSON", "deleteFromJSON successfully deleted item \'" + name + "\'");
+
+        return true;
     }
 }
