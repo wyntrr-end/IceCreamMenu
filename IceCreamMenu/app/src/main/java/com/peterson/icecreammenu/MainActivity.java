@@ -43,7 +43,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static final Boolean TESTING = false;
     public static Boolean hasCamera = false;
-    public static Boolean isAdmin = true;
+    public static Boolean isAdmin = false;
     public static Boolean INIT = true;
     public static final int VIEW_LIST = 0;
     public static final int VIEW_GRID = 1;
@@ -484,7 +484,11 @@ public class MainActivity extends AppCompatActivity {
 
             // create a new FlavorItem with this info and add it to the appropriate flavor list
             FlavorItem flavor = new FlavorItem(imgName, name, type, desc);
-            flavor.setAvailability(true);
+            // availability will be true for all flavors except these 3
+            if (!(name.equals("Almond Fudge")
+                    || name.equals("Bananasplit")
+                    || name.equals("Blueberry Yogurt")))
+                flavor.setAvailability(true);
             addFlavor(flavor);
 
             // create JSONObject from this new FlavorItem and add it to the jsonAllFlavors object,
