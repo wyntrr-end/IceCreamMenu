@@ -41,7 +41,7 @@ import java.util.List;
 // MainActivity
 // =================================================================================================
 public class MainActivity extends AppCompatActivity {
-    public static final Boolean TESTING = true;
+    public static final Boolean TESTING = false;
     public static Boolean hasCamera = false;
     public static Boolean isAdmin = true;
     public static Boolean INIT = true;
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 toolbar.setTitle(R.string.main_header);
                 btnEdit.setVisibility(View.GONE);
             }
-            switchAdmin.setVisibility(View.VISIBLE);
+            if (TESTING) switchAdmin.setVisibility(View.VISIBLE);
             btnViewMode.setVisibility(View.VISIBLE);
             txtExplanation.setVisibility(View.GONE);
             txtAutosave.setVisibility(View.GONE);
