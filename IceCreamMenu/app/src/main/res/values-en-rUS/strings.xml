@@ -1,15 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ice Cream Menu</string>
-    <string name="app_name_short">IC Menu</string>
     <string name="main_header">Today\'s Flavors</string>
-    <string name="main_header_admin">Today\'s Flavors (Admin)</string>
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
-
     <string name="admin_edit_mode_header">Edit Flavors and Availability</string>
     <string name="autosave_description">Changes on this page are automatically saved.</string>
-    <string name="checkbox_explanation">Tap a flavor to toggle availability.</string>
-
     <string name="add_flavor_header">Add New Flavor</string>
     <string name="edit_flavor_header">Edit Flavor</string>
     <string name="add_flavor_name_text">Flavor Name</string>
@@ -19,8 +15,10 @@
     <string name="add_flavor_case_no">Case # (Optional)</string>
     <string name="add_flavor_slot_desc">Slot within case</string>
     <string name="add_flavor_slot_caption">(From Customer Perspective)</string>
+    <string name="app_name_short">IC Menu</string>
     <string name="delete_flavor">Delete This Flavor</string>
-
+    <string name="main_header_admin">Today\'s Flavors (Admin)</string>
+    <string name="checkbox_explanation">Check a flavor to toggle availability.</string>
     <string name="delete_alert_title">Delete flavor?</string>
     <string name="delete_alert_message">This action cannot be undone.</string>
     <string name="delete_alert_positive">Yes</string>

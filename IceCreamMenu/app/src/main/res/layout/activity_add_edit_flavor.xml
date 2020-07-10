@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:maxWidth="1000dp"
+    android:maxHeight="3000dp"
     tools:context=".AddEditFlavorActivity">
 
     <LinearLayout
@@ -18,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/buttonCancel"
+            android:id="@+id/btnBack2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -27,7 +28,7 @@
             app:srcCompat="@drawable/ic_close_yellow_24dp" />
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar2"
+            android:id="@+id/toolbarAddEditFlavor"
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:layout_weight="2"
@@ -38,7 +39,7 @@
             app:titleTextColor="@color/colorAccent" />
 
         <ImageButton
-            android:id="@+id/buttonSave"
+            android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -48,134 +49,71 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="20dp"
-        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar2Layout">
 
-        <ImageButton
-            android:id="@+id/btnAddImage"
-            android:layout_width="185dp"
-            android:layout_height="185dp"
-            android:background="?attr/actionBarItemBackground"
-            android:foreground="@drawable/ic_add_a_photo_grey_24dp"
-            android:foregroundGravity="top|right"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_icecream_vector_purple" />
-
-        <EditText
-            android:id="@+id/txtFlavorName"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:ems="10"
-            android:hint="@string/add_flavor_name_text"
-            android:inputType="textPersonName" />
-
-        <Spinner
-            android:id="@+id/spinnerFlavorType"
-            android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_weight="1.5" />
-
-        <EditText
-            android:id="@+id/txtFlavorDesc"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:ems="10"
-            android:hint="@string/add_flavor_desc_text"
-            android:inputType="textPersonName" />
-
-        <EditText
-            android:id="@+id/txtFlavorCaseNo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:ems="10"
-            android:hint="@string/add_flavor_case_no"
-            android:inputType="number" />
-
         <LinearLayout
-            android:id="@+id/panelSlot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_margin="20dp"
+            android:focusable="false"
+            android:focusableInTouchMode="true"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/lblSlotDesc"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="4dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="4dp"
-                android:text="@string/add_flavor_slot_desc"
-                android:textColor="@color/colorFlavorDesc"
-                android:textSize="18sp" />
+                android:orientation="vertical" />
 
-            <LinearLayout
+            <ImageButton
+                android:id="@+id/btnAddImage"
+                android:layout_width="185dp"
+                android:layout_height="185dp"
+                android:background="?attr/actionBarItemBackground"
+                android:foreground="@drawable/ic_add_a_photo_grey_24dp"
+                android:foregroundGravity="top|right"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_icecream_vector_purple" />
+
+            <EditText
+                android:id="@+id/txtFlavorName"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:layout_height="?attr/actionBarSize"
+                android:ems="10"
+                android:hint="@string/add_flavor_name_text"
+                android:inputType="textPersonName" />
 
-                <RadioButton
-                    android:id="@+id/rb1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rb5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RadioButton
-                    android:id="@+id/rb8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/textView2"
+            <Spinner
+                android:id="@+id/spinnerFlavorType"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_flavor_slot_caption"
-                android:textColor="@color/colorFlavorDesc" />
-        </LinearLayout>
+                android:layout_height="?attr/actionBarSize"
+                android:layout_weight="1.5" />
 
-    </LinearLayout>
+            <EditText
+                android:id="@+id/txtFlavorDesc"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:ems="10"
+                android:hint="@string/add_flavor_desc_text"
+                android:inputType="textPersonName" />
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:backgroundTint="#DDDDDD"
+                android:text="@string/delete_flavor"
+                android:textColor="#FF1100" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
