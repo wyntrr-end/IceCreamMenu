@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 viewMode = VIEW_LIST;
                 updateViewType();
+                reloadContent();
             }
         });
         btnBack.setVisibility(View.GONE);
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 viewMode = VIEW_EDIT;
                 updateViewType();
+                reloadContent();
             }
         });
         if (!isAdmin) {
@@ -146,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 viewMode = (viewMode + 1) % 2;
                 updateViewType();
+                //reloadContent();
             }
         });
 
@@ -158,12 +161,14 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                Log.d("MainActivity", "Changing tab...");
                 tabLayout.setSelected(true);
                 if (tab.getPosition() == 1) {
                     recyclerView.setAdapter(gelatoAdapter);
                 } else {
                     recyclerView.setAdapter(iceCreamAdapter);
                 }
+                updateViewType();
             }
 
             @Override
@@ -185,8 +190,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onRefresh() {
                         Log.i("Refresh", "onRefresh called from SwipeRefreshLayout");
-                        reloadContent();
                         updateViewType();
+                        reloadContent();
                     }
                 }
         );
@@ -216,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
 
         // make sure the recyclerView loads properly
         updateViewType();
-        if (!INIT) reloadContent();
 
         INIT = false;
     }
@@ -225,6 +229,8 @@ public class MainActivity extends AppCompatActivity {
     // deals with switching modes between list, grid, and edit view
     // ---------------------------------------------------------------------------------------------
     private void updateViewType() {
+        Log.i("MainActivity", "Updating view type...");
+
         // make sure the interface button displays the correct icon, and hide it
         // when in admin edit mode
         if (viewMode == VIEW_GRID) {
@@ -246,10 +252,14 @@ public class MainActivity extends AppCompatActivity {
             btnAddFlavor.show();
         } else {
             btnBack.setVisibility(View.GONE);
-            if (isAdmin) toolbar.setTitle(R.string.main_header_admin);
-            else toolbar.setTitle(R.string.main_header);
+            if (isAdmin) {
+                toolbar.setTitle(R.string.main_header_admin);
+                btnEdit.setVisibility(View.VISIBLE);
+            } else {
+                toolbar.setTitle(R.string.main_header);
+                btnEdit.setVisibility(View.GONE);
+            }
             switchAdmin.setVisibility(View.VISIBLE);
-            btnEdit.setVisibility(View.VISIBLE);
             btnViewMode.setVisibility(View.VISIBLE);
             txtExplanation.setVisibility(View.GONE);
             txtAutosave.setVisibility(View.GONE);
@@ -310,39 +320,20 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     // adds a new flavor to the list of flavors using the given type, name, and description
     // ---------------------------------------------------------------------------------------------
-    private void addFlavor(JSONObject jsonFlavor) {
-        String name = "";
-        int type = 0;
-        String desc = "";
-        String img = "";
-        boolean avail = false;
-
-        // get the fields from the JSONObject
-        try {
-            img = jsonFlavor.getString("IMG");
-            name = jsonFlavor.getString("NAME");
-            type = jsonFlavor.getInt("TYPE");
-            desc = jsonFlavor.getString("DESC");
-            avail = jsonFlavor.getBoolean("AVAIL");
-        } catch (org.json.JSONException e) {
-            Log.e("JSON", "Error parsing JSON flavor in addFlavor()");
-            e.printStackTrace();
+    private void addFlavor(FlavorItem flavor) {
+        // if we're not in admin edit mode and the flavor is not available, don't add it to the list
+        if (viewMode != VIEW_EDIT && !flavor.isAvailable()) {
+            return;
         }
-
-        // if the name or type fields are blank, do nothing
-        if (name.equals("") || type == 0) return;
-
-        FlavorItem newFlavor = new FlavorItem(img, name, type, desc);
-        newFlavor.setAvailability(avail);
 
         // add the new flavor to the corresponding list of flavors, re-sort the list,
         // and refresh the adapter
-        if (type == FlavorItem.ICE_CREAM) {
-            iceCreamFlavorList.add(newFlavor);
+        if (flavor.getType() == FlavorItem.ICE_CREAM) {
+            iceCreamFlavorList.add(flavor);
             Collections.sort(iceCreamFlavorList);
             iceCreamAdapter.notifyDataSetChanged();
         } else {
-            gelatoFlavorList.add(newFlavor);
+            gelatoFlavorList.add(flavor);
             Collections.sort(gelatoFlavorList);
             gelatoAdapter.notifyDataSetChanged();
         }
@@ -360,19 +351,15 @@ public class MainActivity extends AppCompatActivity {
     // ---------------------------------------------------------------------------------------------
     private void toggleAdmin() {
         isAdmin = !isAdmin;
-        if (isAdmin) {
-            btnEdit.setVisibility(View.VISIBLE);
-            toolbar.setTitle(R.string.main_header_admin);
-        } else {
-            btnEdit.setVisibility(View.GONE);
-            toolbar.setTitle(R.string.main_header);
-        }
+        updateViewType();
     }
 
     // ---------------------------------------------------------------------------------------------
     // reload all the flavors from the "flavors.json" file
     // ---------------------------------------------------------------------------------------------
     private void reloadContent() {
+        Log.i("MainActivity", "Reloading content...");
+
         // read in the "flavors.json" file and get an array of the contained flavor names
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
         JSONObject jsonFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
@@ -409,8 +396,15 @@ public class MainActivity extends AppCompatActivity {
 
                 // get the flavor corresponding with that name from the flavors object
                 // and then add it to the flavor lists
-                JSONObject jsonFlavor = jsonFlavors.getJSONObject(name);
-                addFlavor(jsonFlavor);
+                FlavorItem flavor = new FlavorItem();
+                if (flavor.readFromJSONFile(flavorFile, name)) {
+                    addFlavor(flavor);
+                } else {
+                    Log.e(
+                            "MainActivity",
+                            "ReloadContent cannot read flavor \'" + name + "\' from file"
+                    );
+                }
             }
             // if stuff fails, reload the old lists and exit
             catch (org.json.JSONException e) {
@@ -433,6 +427,8 @@ public class MainActivity extends AppCompatActivity {
     // -- this is only for use when testing
     // ---------------------------------------------------------------------------------------------
     public void loadSampleInfo() {
+        Log.i("MainActivity", "Loading sample data...");
+
         // load names from R.array.flavor_names_array
         String[] mFlavorNameArray = getResources().getStringArray(R.array.flavor_names_array);
 
@@ -486,25 +482,20 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
-            // using the flavor name as the object name
-            JSONObject jsonFlavor = new JSONObject();
-            try {
-                jsonFlavor.put("IMG", imgName);
-                jsonFlavor.put("NAME", name);
-                jsonFlavor.put("TYPE", type);
-                jsonFlavor.put("DESC", desc);
-                jsonFlavor.put("AVAIL", true);
-                Log.d("JSON", jsonFlavor.toString(2));
+            // create a new FlavorItem with this info and add it to the appropriate flavor list
+            FlavorItem flavor = new FlavorItem(imgName, name, type, desc);
+            flavor.setAvailability(true);
+            addFlavor(flavor);
 
+            // create JSONObject from this new FlavorItem and add it to the jsonAllFlavors object,
+            // using the flavor name as the object name
+            JSONObject jsonFlavor = flavor.toJSONObject();
+            try {
                 jsonAllFlavors.put(name, jsonFlavor);
             } catch (JSONException e) {
                 Log.e("JSON", "Error putting to JSON object.");
                 e.printStackTrace();
             }
-
-            // add this flavor to the flavorlists as well
-            addFlavor(jsonFlavor);
         }
 
         // write the updated jsonAllFlavors to "flavors.json"

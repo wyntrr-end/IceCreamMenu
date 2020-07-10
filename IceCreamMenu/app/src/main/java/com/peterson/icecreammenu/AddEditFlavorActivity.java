@@ -8,28 +8,20 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -145,7 +137,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
         oldFlavor = new FlavorItem();
-        if (!oldFlavor.readFromJSON(flavorFile, name)) {
+        if (!oldFlavor.readFromJSONFile(flavorFile, name)) {
             Log.e("JSON", "Unable to read flavor.");
             return;
         }
@@ -280,7 +272,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 
         // if required fields are good save the new/edited flavor to file
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
-        switch (flavor.writeToJSON(flavorFile)) {
+        switch (flavor.writeToJSONFile(flavorFile)) {
             case FlavorItem.DUPLICATE: {
                 // if this flavor name has already been used, show an error message and don't save
                 Toast.makeText(
@@ -342,7 +334,7 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 
         // remove the flavor from "flavors.json"
         File flavorFile = new File(getApplicationContext().getFilesDir(), "flavors.json");
-        FlavorItem.deleteFromJSON(flavorFile, oldFlavor.getName());
+        FlavorItem.deleteFromJSONFile(flavorFile, oldFlavor.getName());
 
         setResult(DELETED);
         finishAfterTransition();

@@ -59,7 +59,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     public void onBindViewHolder(final FlavorHolder holder, final int position) {
         // get the FlavorItem at this position
         final FlavorItem flavor = new FlavorItem();
-        flavor.readFromJSON(flavorFile, mFlavorItemList.get(position).getName());
+        flavor.readFromJSONFile(flavorFile, mFlavorItemList.get(position).getName());
 
         // replace the contents of the view with values appropriate for that FlavorItem
         String flavorImgName = flavor.getImgName();
@@ -88,7 +88,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                     holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
                     flavor.setAvailability(holder.chAvailable.isChecked());
                     mFlavorItemList.get(position).setAvailability(holder.chAvailable.isChecked());
-                    flavor.writeToJSON(flavorFile);
+                    flavor.writeToJSONFile(flavorFile);
                 }
             });
 
@@ -110,6 +110,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                 holder.itemView.setVisibility(View.VISIBLE);
                 holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             } else {
+                Log.d(
+                        "Adapter",
+                        "flavor unavailable: " + holder.nameTextView.getText()
+                );
                 holder.itemView.setVisibility(View.GONE);
                 holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
             }

@@ -110,35 +110,30 @@ public class FlavorItem implements Comparable<FlavorItem> {
     // read a flavor corresponding with the given name from the given File as a JSONObject,
     // returning true when successful and false when unsuccessful
     // ---------------------------------------------------------------------------------------------
-    public boolean readFromJSON(File flavorFile, String flavorName) {
+    public boolean readFromJSONFile(File flavorFile, String flavorName) {
         // read flavorFile into a JSONObject
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
         // if this flavor name does not exist, show error message and return false
         if (!jsonAllFlavors.has(flavorName)) {
-            Log.e("JSON", "JSON file does not contain a flavor called" + flavorName);
+            Log.e("FlavorItem", "JSON file does not contain a flavor called" + flavorName);
             return false;
         }
 
-        // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
-        // using the flavor name as the object name
-        JSONObject jsonFlavor = new JSONObject();
+        // get the associated JSONObject from jsonAllFlavors and fill this FlavorItem's info
+        // from that object
+        JSONObject jsonFlavor;
         try {
             jsonFlavor = jsonAllFlavors.getJSONObject(flavorName);
-            Log.d("JSON", "Read in flavor \"" + flavorName + "\": " + jsonFlavor.toString(2));
+            Log.d("FlavorItem", "Read in flavor \"" + flavorName + "\": " + jsonFlavor.toString(2));
 
-            imgName = jsonFlavor.getString("IMG");
-            name = flavorName;
-            oldName = name;
-            type = jsonFlavor.getInt("TYPE");
-            description = jsonFlavor.getString("DESC");
-            available = jsonFlavor.getBoolean("AVAIL");
+            fillFromJSONObject(jsonFlavor);
         } catch (JSONException e) {
-            Log.e("JSON", "Error putting to JSON object.");
+            Log.e("FlavorItem", "Error getting from JSON object.");
             e.printStackTrace();
             return false;
         }
-        Log.d("JSON", "readFromJSON oldName = " + oldName);
+        Log.d("FlavorItem", "readFromJSONFile oldName = " + oldName);
         return true;
     }
 
@@ -146,39 +141,31 @@ public class FlavorItem implements Comparable<FlavorItem> {
     // write this FlavorItem to the given File as a JSONObject, returning SUCCESSFUL, UNSUCCESSFUL,
     // or DUPLICATE
     // ---------------------------------------------------------------------------------------------
-    public int writeToJSON(File flavorFile) {
+    public int writeToJSONFile(File flavorFile) {
         // read flavorFile into a JSONObject
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
         // if there is an old flavor (i.e. we are in editing mode), clear that entry
         // so we can replace it, then reset the old name
-        Log.d("JSON", "writeToJSON oldName = " + oldName);
+        Log.d("FlavorItem", "writeToJSONFile oldName = " + oldName);
         if (!oldName.equals("")) {
             jsonAllFlavors.remove(oldName);
-            Log.d("JSON", "writeToJSON removed item " + oldName);
+            Log.d("FlavorItem", "writeToJSONFile removed item " + oldName);
         }
 
         // if this flavor name has already been used, return with DUPLICATE status
         if (jsonAllFlavors.has(name)) {
-            Log.d("JSON", "writeToJSON duplicate item " + name);
+            Log.d("FlavorItem", "writeToJSONFile duplicate item " + name);
             return DUPLICATE;
         }
 
-        // create JSONObject for this new Flavor and add it to the jsonAllFlavors object,
+        // create JSONObject of this new Flavor and add it to the jsonAllFlavors object,
         // using the flavor name as the object name
-        JSONObject jsonFlavor = new JSONObject();
+        JSONObject jsonFlavor = this.toJSONObject();
         try {
-            jsonFlavor.put("IMG", imgName);
-            jsonFlavor.put("NAME", name);
-            jsonFlavor.put("TYPE", type);
-            jsonFlavor.put("DESC", description);
-            jsonFlavor.put("AVAIL", available);
-            Log.d("JSON", jsonFlavor.toString(2));
-
             jsonAllFlavors.put(name, jsonFlavor);
-            //Log.d("JSON", jsonAllFlavors.toString(2));
         } catch (JSONException e) {
-            Log.d("JSON", "Error putting to JSON object.");
+            Log.d("FlavorItem", "Error putting to JSON object.");
             e.printStackTrace();
             return UNSUCCESSFUL;
         }
@@ -192,14 +179,14 @@ public class FlavorItem implements Comparable<FlavorItem> {
     // delete the flavor corresponding to the given name from the given File, returning true if
     // successful and false if no such flavor exists
     // ---------------------------------------------------------------------------------------------
-    public static boolean deleteFromJSON(File flavorFile, String name) {
+    public static boolean deleteFromJSONFile(File flavorFile, String name) {
         // read flavorFile into a JSONObject
         JSONObject jsonAllFlavors = JSONFileHandler.readJsonObjectFromFile(flavorFile);
 
-        Log.d("JSON", "deleteFromJSON name = " + name);
+        Log.d("FlavorItem", "deleteFromJSONFile name = " + name);
         // if jsonAllFlavors does not have the specified flavor, return false
         if (!jsonAllFlavors.has(name)) {
-            Log.d("JSON", "deleteFromJSON could not delete item \'" + name + "\' because it does not exist.");
+            Log.d("FlavorItem", "deleteFromJSONFile could not delete item \'" + name + "\' because it does not exist.");
             return false;
         }
 
@@ -207,8 +194,44 @@ public class FlavorItem implements Comparable<FlavorItem> {
         // to the given file
         jsonAllFlavors.remove(name);
         JSONFileHandler.writeJsonObjectToFile(jsonAllFlavors, flavorFile);
-        Log.d("JSON", "deleteFromJSON successfully deleted item \'" + name + "\'");
+        Log.d("FlavorItem", "deleteFromJSONFile successfully deleted item \'" + name + "\'");
 
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // converts the FlavorItem into a JSONObject
+    // ---------------------------------------------------------------------------------------------
+    public JSONObject toJSONObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("IMG", imgName);
+            jsonObject.put("NAME", name);
+            jsonObject.put("TYPE", type);
+            jsonObject.put("DESC", description);
+            jsonObject.put("AVAIL", available);
+        } catch (JSONException e) {
+            Log.e("FlavorItem", "Error putting to JSON object.");
+            e.printStackTrace();
+            return null;
+        }
+        return jsonObject;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // populates this FlavorItem with info from the given JSONObject
+    // ---------------------------------------------------------------------------------------------
+    public void fillFromJSONObject(JSONObject jsonFlavor) {
+        try {
+            imgName = jsonFlavor.getString("IMG");
+            name = jsonFlavor.getString("NAME");
+            oldName = name;
+            type = jsonFlavor.getInt("TYPE");
+            description = jsonFlavor.getString("DESC");
+            available = jsonFlavor.getBoolean("AVAIL");
+        } catch (JSONException e) {
+            Log.e("FlavorItem", "Error getting from JSON object: " + jsonFlavor.toString());
+            e.printStackTrace();
+        }
     }
 }
