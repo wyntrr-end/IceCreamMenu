@@ -1,5 +1,6 @@
 package com.peterson.icecreammenu;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,17 +22,28 @@ import java.util.List;
 // =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     private List<FlavorItem> mFlavorItemList;
-    private MainActivity mMainActivity;
+    private Context mContext;
     private int viewMode = MainActivity.VIEW_LIST;
     private File flavorFile;
+
+    private AdminEditActivity mAdminEditActivity;
 
     // ---------------------------------------------------------------------------------------------
     // basic constructor
     // ---------------------------------------------------------------------------------------------
-    public MyAdapter(MainActivity mainActivity, List<FlavorItem> flavorItemList) {
-        mMainActivity = mainActivity;
+    public MyAdapter(Context context, List<FlavorItem> flavorItemList) {
+        mContext = context;
         mFlavorItemList = flavorItemList;
-        flavorFile = new File(mMainActivity.getApplicationContext().getFilesDir(), "flavors.json");
+        flavorFile = new File(mContext.getFilesDir(), "flavors.json");
+    }
+    // ---------------------------------------------------------------------------------------------
+    // basic constructor
+    // ---------------------------------------------------------------------------------------------
+    public MyAdapter(AdminEditActivity adminEditActivity, List<FlavorItem> flavorItemList) {
+        mAdminEditActivity = adminEditActivity;
+        mContext = adminEditActivity.getApplicationContext();
+        mFlavorItemList = flavorItemList;
+        flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -65,7 +77,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         String flavorImgName = flavor.getImgName();
         if (!flavorImgName.equals("")) {
             // if an image name is given, use that to set the image
-            File flavorImg = new File(mMainActivity.getApplicationContext().getFilesDir(), flavorImgName);
+            File flavorImg = new File(mContext.getFilesDir(), flavorImgName);
             holder.imageView.setImageURI(Uri.fromFile(flavorImg));
         } else {
             // if no image name is given, use the placeholder icon
@@ -101,7 +113,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                                 "Adapter",
                                 "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
                         );
-                        mMainActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
+                        mAdminEditActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
                     }
                 });
         }

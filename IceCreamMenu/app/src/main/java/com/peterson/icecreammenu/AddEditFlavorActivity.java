@@ -16,11 +16,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
 
@@ -262,10 +263,10 @@ public class AddEditFlavorActivity extends AppCompatActivity {
 
         // require a flavor type to be specified
         if (flavor.getType() == 0) {
-            Toast.makeText(
-                    getApplicationContext(),
+            Snackbar.make(
+                    Objects.requireNonNull(getCurrentFocus()),
                     R.string.flavor_type_error_msg,
-                    Toast.LENGTH_SHORT
+                    Snackbar.LENGTH_LONG
             ).show();
             return;
         }
@@ -275,10 +276,10 @@ public class AddEditFlavorActivity extends AppCompatActivity {
         switch (flavor.writeToJSONFile(flavorFile)) {
             case FlavorItem.DUPLICATE: {
                 // if this flavor name has already been used, show an error message and don't save
-                Toast.makeText(
-                        getApplicationContext(),
+                Snackbar.make(
+                        Objects.requireNonNull(getCurrentFocus()),
                         R.string.flavor_duplicate_error_msg,
-                        Toast.LENGTH_LONG
+                        Snackbar.LENGTH_LONG
                 ).show();
                 return;
             }

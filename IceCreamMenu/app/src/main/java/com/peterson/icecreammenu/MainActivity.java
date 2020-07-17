@@ -57,19 +57,14 @@ public class MainActivity extends AppCompatActivity {
     private MyAdapter iceCreamAdapter;
     private MyAdapter gelatoAdapter;
 
-    private ImageButton btnBack;
     private Toolbar toolbar;
     private ImageButton btnEdit;
     private Switch switchAdmin;
     private ImageButton btnViewMode;
-    private TextView txtExplanation;
-    private TextView txtAutosave;
+//    private TextView txtExplanation;
+//    private TextView txtAutosave;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton btnAddFlavor;
-
-    private ViewGroup rootView;
-    private Fade mFade;
 
     private List<FlavorItem> iceCreamFlavorList;
     private List<FlavorItem> gelatoFlavorList;
@@ -81,10 +76,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        rootView = (ViewGroup) findViewById(R.id.mainLayout);
-        mFade = new Fade(Fade.IN);
-        TransitionManager.beginDelayedTransition(rootView, mFade);
 
         // instantiate flavor lists
         iceCreamFlavorList = new ArrayList<>();
@@ -106,18 +97,10 @@ public class MainActivity extends AppCompatActivity {
         if (INIT) {
             loadSampleInfo();
             hasCamera = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-        }
 
-        btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewMode = VIEW_LIST;
-                updateViewType();
-                reloadContent();
-            }
-        });
-        btnBack.setVisibility(View.GONE);
+            Intent intent = new Intent(this, AdminEditActivity.class);
+            startActivity(intent);
+        }
 
         toolbar = findViewById(R.id.toolbarMain);
         if (!isAdmin) {
@@ -128,9 +111,8 @@ public class MainActivity extends AppCompatActivity {
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewMode = VIEW_EDIT;
-                updateViewType();
-                reloadContent();
+                Intent intent = new Intent(getApplicationContext(), AdminEditActivity.class);
+                startActivityForResult(intent, 1);
             }
         });
         if (!isAdmin) {
@@ -158,12 +140,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 viewMode = (viewMode + 1) % 2;
                 updateViewType();
-                //reloadContent();
             }
         });
 
-        txtExplanation = findViewById(R.id.txtExplanation);
-        txtAutosave = findViewById(R.id.txtAutosave);
+//        txtExplanation = findViewById(R.id.txtExplanation);
+//        txtAutosave = findViewById(R.id.txtAutosave);
 
         // changing tabs switches the recyclerView adapter in order to
         // display appropriate information
@@ -220,19 +201,26 @@ public class MainActivity extends AppCompatActivity {
             btnLoadSampleData.setVisibility(View.GONE);
         }
 
-        // set up a button to add a new flavor
-        btnAddFlavor = findViewById(R.id.btnAddFlavor);
-        btnAddFlavor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchAddFlavorActivity();
-            }
-        });
-
         // make sure the recyclerView loads properly
         updateViewType();
 
         INIT = false;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // deals with the result of AddEditFlavorActivity, adding/modifying the corresponding flavor
+    // or doing nothing if the activity was cancelled
+    // ---------------------------------------------------------------------------------------------
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // if info was changed, reload the content
+        if (resultCode == AdminEditActivity.MODIFIED) {
+            reloadContent();
+        }
+
+        // otherwise do nothing
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -253,22 +241,12 @@ public class MainActivity extends AppCompatActivity {
 
         // show/hide certian buttons in admin edit mode
         if (viewMode == VIEW_EDIT) {
-            rootView.addView(btnBack);
-            rootView.addView(txtExplanation);
-            rootView.addView(txtAutosave);
-//            btnBack.setVisibility(View.VISIBLE);
             toolbar.setTitle(R.string.admin_edit_mode_header);
             switchAdmin.setVisibility(View.GONE);
             btnEdit.setVisibility(View.GONE);
 //            txtExplanation.setVisibility(View.VISIBLE);
 //            txtAutosave.setVisibility(View.VISIBLE);
-            btnAddFlavor.show();
         } else {
-            rootView.removeView(btnBack);
-            rootView.removeView(txtExplanation);
-            rootView.removeView(txtAutosave);
-
-//            btnBack.setVisibility(View.GONE);
             if (isAdmin) {
                 toolbar.setTitle(R.string.main_header_admin);
                 btnEdit.setVisibility(View.VISIBLE);
@@ -280,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
             btnViewMode.setVisibility(View.VISIBLE);
 //            txtExplanation.setVisibility(View.GONE);
 //            txtAutosave.setVisibility(View.GONE);
-            btnAddFlavor.hide();
         }
 
         // update the view mode and get the current adapter
@@ -297,41 +274,6 @@ public class MainActivity extends AppCompatActivity {
         }
         // reset the adapter to refresh the layout
         recyclerView.setAdapter(mAdapter);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // launches AddEditFlavorActivity in Add mode
-    // ---------------------------------------------------------------------------------------------
-    private void launchAddFlavorActivity() {
-        Intent intent = new Intent(this, AddEditFlavorActivity.class);
-        intent.putExtra("MODE", AddEditFlavorActivity.ADD_MODE);
-        startActivityForResult(intent, 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // launches AddEditFlavorActivity in Edit mode, passing the name of the flavor to edit
-    // ---------------------------------------------------------------------------------------------
-    public void launchEditFlavorActivity(String flavorName) {
-        Intent intent = new Intent(this, AddEditFlavorActivity.class);
-        intent.putExtra("MODE", AddEditFlavorActivity.EDIT_MODE);
-        intent.putExtra("OLD_NAME", flavorName);
-        startActivityForResult(intent, 1);
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // deals with the result of AddEditFlavorActivity, adding/modifying the corresponding flavor
-    // or doing nothing if the activity was cancelled
-    // ---------------------------------------------------------------------------------------------
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // if the activity was not cancelled, reload the content
-        if (resultCode != AddEditFlavorActivity.CANCELLED) {
-            reloadContent();
-        }
-
-        // otherwise do nothing
     }
 
     // ---------------------------------------------------------------------------------------------
