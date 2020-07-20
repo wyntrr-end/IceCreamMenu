@@ -21,7 +21,7 @@ import java.util.List;
 // class which defines how FlavorItems are displayed in the main RecyclerView
 // =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
-    private List<FlavorItem> mFlavorItemList;
+    private FlavorList mFlavorItemList;
     private Context mContext;
     private int viewMode = MainActivity.VIEW_LIST;
     private File flavorFile;
@@ -31,7 +31,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // ---------------------------------------------------------------------------------------------
     // basic constructor
     // ---------------------------------------------------------------------------------------------
-    public MyAdapter(Context context, List<FlavorItem> flavorItemList) {
+    public MyAdapter(Context context, FlavorList flavorItemList) {
         mContext = context;
         mFlavorItemList = flavorItemList;
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
@@ -39,10 +39,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // ---------------------------------------------------------------------------------------------
     // basic constructor
     // ---------------------------------------------------------------------------------------------
-    public MyAdapter(AdminEditActivity adminEditActivity, List<FlavorItem> flavorItemList) {
+    public MyAdapter(AdminEditActivity adminEditActivity, FlavorList flavorItemList) {
         mAdminEditActivity = adminEditActivity;
         mContext = adminEditActivity.getApplicationContext();
         mFlavorItemList = flavorItemList;
+        viewMode = MainActivity.VIEW_EDIT;
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
 

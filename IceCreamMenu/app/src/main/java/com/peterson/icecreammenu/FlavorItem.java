@@ -125,7 +125,11 @@ public class FlavorItem implements Comparable<FlavorItem> {
         JSONObject jsonFlavor;
         try {
             jsonFlavor = jsonAllFlavors.getJSONObject(flavorName);
-            Log.d("FlavorItem", "Read in flavor \"" + flavorName + "\": " + jsonFlavor.toString(2));
+            if (MainActivity.TESTING && MainActivity.VERBOSE)
+                Log.d("FlavorItem",
+                        "Read in flavor \"" + flavorName + "\": "
+                                + jsonFlavor.toString(2)
+                );
 
             fillFromJSONObject(jsonFlavor);
         } catch (JSONException e) {
@@ -133,7 +137,8 @@ public class FlavorItem implements Comparable<FlavorItem> {
             e.printStackTrace();
             return false;
         }
-        Log.d("FlavorItem", "readFromJSONFile oldName = " + oldName);
+        if (MainActivity.TESTING && MainActivity.VERBOSE)
+            Log.d("FlavorItem", "readFromJSONFile oldName = " + oldName);
         return true;
     }
 

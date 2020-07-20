@@ -9,104 +9,59 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbarMain"
-            android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_weight="1"
-            android:background="?attr/colorPrimary"
-            android:elevation="0dp"
-            android:theme="?attr/actionBarTheme"
-            app:title="@string/main_header_admin"
-            app:titleTextColor="@color/colorAccent" />
-
-        <ImageButton
-            android:id="@+id/btnEdit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="0"
-            android:background="?attr/actionBarItemBackground"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_edit_yellow_24dp" />
-
-        <Switch
-            android:id="@+id/switchAdmin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0" />
-
-        <ImageButton
-            android:id="@+id/btnViewMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="0"
-            android:background="?attr/actionBarItemBackground"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_view_module_yellow_24dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_layout">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarMain"
+                android:layout_width="wrap_content"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tabTextColor="@color/colorPrimaryDark">
+                android:layout_weight="1"
+                android:background="?attr/colorPrimary"
+                android:elevation="0dp"
+                android:theme="?attr/actionBarTheme"
+                app:title="@string/main_header_admin"
+                app:titleTextColor="@color/colorAccent" />
 
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tab1_header" />
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="0"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="4dp"
+                app:srcCompat="@drawable/ic_edit_yellow_24dp" />
 
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tab2_header" />
-            </com.google.android.material.tabs.TabLayout>
+            <Switch
+                android:id="@+id/switchAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0" />
 
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/swiperefresh"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tab_layout">
+            <ImageButton
+                android:id="@+id/btnViewMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="0"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="4dp"
+                app:srcCompat="@drawable/ic_view_module_yellow_24dp" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fadeScrollbars="false"
-                    android:scrollbars="vertical"
-                    tools:itemCount="24"
-                    tools:listitem="@layout/recycler_list_item">
+        </LinearLayout>
 
-                </androidx.recyclerview.widget.RecyclerView>
-
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <include layout="@layout/fragment_recycler_view" />
 
     </LinearLayout>
 
