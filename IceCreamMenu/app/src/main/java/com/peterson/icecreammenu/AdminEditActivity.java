@@ -19,6 +19,20 @@ import android.view.View;
 
 import java.io.File;
 
+// =================================================================================================
+// Activity which allows admin users to modify the lists of flavors.
+//
+// Admins can:
+//      - Switch between Ice Cream and Gelato/Sorbet lists
+//      - Add new flavors
+//      - Delete flavors
+//      - Edit flavors
+//      - Toggle the availability of flavors
+//      - Return to MainActivity
+//
+// ** NOTE **
+//      MUST set dataStatus to MODIFIED if any changes have been made before finishing
+// =================================================================================================
 public class AdminEditActivity extends AppCompatActivity {
     public static int MODIFIED = 1;
     private int dataStatus = 0;

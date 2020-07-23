@@ -10,13 +10,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,10 +40,17 @@ import java.util.Collections;
 import java.util.List;
 
 // =================================================================================================
-// MainActivity
+// Main Activity which allows any user to view the lists of flavors.
+
+// Users can:
+//      - Switch between Ice Cream and Gelato/Sorbet lists
+//      - Switch between list and grid view
+
+// Admins can:
+//      - Switch to Admin Edit Mode in order to manage flavors
 // =================================================================================================
 public class MainActivity extends AppCompatActivity {
-    public static final boolean TESTING = false;
+    public static final boolean TESTING = true;
     public static final boolean VERBOSE = false;
 
     public static boolean hasCamera = false;
@@ -96,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
             loadSampleInfo();
             hasCamera = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 
-            Intent intent = new Intent(this, AdminEditActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(this, AdminEditActivity.class);
+//            startActivity(intent);
         }
 
         toolbar = findViewById(R.id.toolbarMain);
@@ -201,6 +211,15 @@ public class MainActivity extends AppCompatActivity {
         reloadContent();
 
         INIT = false;
+
+        if (TESTING) {
+            Log.d("MainActivity",
+                    "thingy = " + iceCreamFlavorList.size()
+            );
+            Log.d("MainActivity",
+                    "thingy = " + recyclerView.getAdapter().getItemCount()
+            );
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
