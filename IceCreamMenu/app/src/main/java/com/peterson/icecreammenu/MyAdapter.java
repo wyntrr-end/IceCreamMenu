@@ -1,5 +1,6 @@
 package com.peterson.icecreammenu;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,24 +15,36 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
-import java.util.List;
 
 // =================================================================================================
-// class which defines how FlavorItems are displayed in the main RecyclerView
+// Custom implementation of a RecyclerView Adapter which defines how FlavorItems are displayed
+// in the main RecyclerView.
 // =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
-    private List<FlavorItem> mFlavorItemList;
-    private MainActivity mMainActivity;
+    private FlavorList mFlavorList;
+    private Context mContext;
     private int viewMode = MainActivity.VIEW_LIST;
     private File flavorFile;
+
+    private AdminEditActivity mAdminEditActivity;
 
     // ---------------------------------------------------------------------------------------------
     // basic constructor
     // ---------------------------------------------------------------------------------------------
-    public MyAdapter(MainActivity mainActivity, List<FlavorItem> flavorItemList) {
-        mMainActivity = mainActivity;
-        mFlavorItemList = flavorItemList;
-        flavorFile = new File(mMainActivity.getApplicationContext().getFilesDir(), "flavors.json");
+    public MyAdapter(Context context, FlavorList flavorList) {
+        mContext = context;
+        mFlavorList = flavorList;
+        flavorFile = new File(mContext.getFilesDir(), "flavors.json");
+    }
+    // ---------------------------------------------------------------------------------------------
+    // constructor called from AdminEditActivity to allow editing functions
+    // ---------------------------------------------------------------------------------------------
+    public MyAdapter(AdminEditActivity adminEditActivity, FlavorList flavorList) {
+        mAdminEditActivity = adminEditActivity;
+        mContext = adminEditActivity.getApplicationContext();
+        mFlavorList = flavorList;
+        viewMode = MainActivity.VIEW_EDIT;
+        flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -59,13 +72,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     public void onBindViewHolder(final FlavorHolder holder, final int position) {
         // get the FlavorItem at this position
         final FlavorItem flavor = new FlavorItem();
-        flavor.readFromJSONFile(flavorFile, mFlavorItemList.get(position).getName());
+        flavor.readFromJSONFile(flavorFile, mFlavorList.get(position).getName());
 
         // replace the contents of the view with values appropriate for that FlavorItem
         String flavorImgName = flavor.getImgName();
         if (!flavorImgName.equals("")) {
             // if an image name is given, use that to set the image
-            File flavorImg = new File(mMainActivity.getApplicationContext().getFilesDir(), flavorImgName);
+            File flavorImg = new File(mContext.getFilesDir(), flavorImgName);
             holder.imageView.setImageURI(Uri.fromFile(flavorImg));
         } else {
             // if no image name is given, use the placeholder icon
@@ -87,7 +100,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                     // TODO -- deal with toggling and saving the availability
                     holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
                     flavor.setAvailability(holder.chAvailable.isChecked());
-                    mFlavorItemList.get(position).setAvailability(holder.chAvailable.isChecked());
+                    mFlavorList.get(position).setAvailability(holder.chAvailable.isChecked());
                     flavor.writeToJSONFile(flavorFile);
                 }
             });
@@ -101,7 +114,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                                 "Adapter",
                                 "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
                         );
-                        mMainActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
+                        mAdminEditActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
                     }
                 });
         }
@@ -125,7 +138,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // ---------------------------------------------------------------------------------------------
     @Override
     public int getItemCount() {
-        return mFlavorItemList.size();
+        return mFlavorList.size();
     }
 
     // ---------------------------------------------------------------------------------------------
