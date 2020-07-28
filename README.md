@@ -5,8 +5,8 @@ Administrators may add, edit, and delete flavors, as well as toggle each flavor'
 
 User's Main View | Admin's Main View
 ------- | --------
-![User's Main View](/IceCreamMenu/user-screenshot-main.png) | ![Admin's Main View](/IceCreamMenu/admin-screenshot-main.png)
+![User's Main View](/screenshots/user-screenshot-main.png) | ![Admin's Main View](/screenshots/admin-screenshot-main.png)
 
 Admin's Editing View | Admin Editing a Flavor
 ------- | --------
-![Admin's Editing View](/IceCreamMenu/admin-screenshot-edit.png) | ![Admin Editing a Flavor](/IceCreamMenu/admin-screenshot-edit-flavor.png)
+![Admin's Editing View](/screenshots/admin-screenshot-edit.png) | ![Admin Editing a Flavor](/screenshots/admin-screenshot-edit-flavor.png)
