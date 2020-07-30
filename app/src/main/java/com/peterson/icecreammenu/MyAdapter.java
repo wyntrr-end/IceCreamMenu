@@ -35,6 +35,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     public MyAdapter(Context context, FlavorList flavorList) {
         mContext = context;
         mFlavorList = flavorList;
+        availFlavorList = new FlavorList(mFlavorList.getType());
+        refreshAvailableFlavors();
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
     // ---------------------------------------------------------------------------------------------
@@ -49,7 +51,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     }
 
     private void refreshAvailableFlavors() {
-        availFlavorList.clear();
+        if (availFlavorList != null) availFlavorList.clear();
         for (int i = 0; i < mFlavorList.size(); i++) {
             FlavorItem f = mFlavorList.get(i);
             if (f.isAvailable())
