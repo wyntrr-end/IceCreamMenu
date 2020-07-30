@@ -21,10 +21,11 @@ import java.io.File;
 // in the main RecyclerView.
 // =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
-    private FlavorList mFlavorList;
-    private Context mContext;
+    private final FlavorList mFlavorList;
+    private FlavorList availFlavorList;
+    private final Context mContext;
     private int viewMode = MainActivity.VIEW_LIST;
-    private File flavorFile;
+    private final File flavorFile;
 
     private AdminEditActivity mAdminEditActivity;
 
@@ -47,8 +48,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
 
+    private void refreshAvailableFlavors() {
+        availFlavorList.clear();
+        for (int i = 0; i < mFlavorList.size(); i++) {
+            FlavorItem f = mFlavorList.get(i);
+            if (f.isAvailable())
+                availFlavorList.addFlavor(f);
+        }
+    }
+
     // ---------------------------------------------------------------------------------------------
-    // create new views (invoked by the layout manager)
+    // create new view holders for each item (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,7 +76,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // set the contents of a view (invoked by the layout manager)
+    // set the contents of an item view holder (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public void onBindViewHolder(final FlavorHolder holder, final int position) {
@@ -134,11 +144,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Return the size of the dataset (invoked by the layout manager)
+    // Return the size of the current dataset (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public int getItemCount() {
-        return mFlavorList.size();
+        if (viewMode == MainActivity.VIEW_EDIT)
+            return mFlavorList.size();
+        return availFlavorList.size();
     }
 
     // ---------------------------------------------------------------------------------------------
