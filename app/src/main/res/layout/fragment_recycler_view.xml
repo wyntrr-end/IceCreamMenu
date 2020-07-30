@@ -32,16 +32,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fadeScrollbars="false"
-            android:scrollbars="vertical"
-            tools:itemCount="24"
-            tools:listitem="@layout/recycler_list_item">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" >
 
-        </androidx.recyclerview.widget.RecyclerView>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fadeScrollbars="false"
+                android:scrollbars="vertical"
+                tools:itemCount="24"
+                tools:listitem="@layout/recycler_list_item">
+
+            </androidx.recyclerview.widget.RecyclerView>
+        </androidx.viewpager.widget.ViewPager>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

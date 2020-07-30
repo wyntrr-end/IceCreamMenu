@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -68,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private ImageButton btnEdit;
-    private Switch switchAdmin;
     private ImageButton btnViewMode;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // allow toggling admin/user version when testing
-        switchAdmin = findViewById(R.id.switchAdmin);
+        Switch switchAdmin = findViewById(R.id.switchAdmin);
         switchAdmin.setChecked(isAdmin);
         if (TESTING) {
             switchAdmin.setOnClickListener(new View.OnClickListener() {
@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        tabLayout.setupWithViewPager((ViewPager) findViewById(R.id.pager));
 
         // call the method to update the displayed content when the user performs
         // a swipe-to-refresh gesture
