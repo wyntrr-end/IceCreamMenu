@@ -128,6 +128,10 @@ public class FlavorList extends ArrayList {
         return newList;
     }
 
+    public void clear() {
+        flavors.clear();
+    }
+
     public FlavorItem get(int index) {
         return flavors.get(index);
     }

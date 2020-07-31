@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private ImageButton btnEdit;
-    private Switch switchAdmin;
     private ImageButton btnViewMode;
     private TabLayout tabLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -128,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // allow toggling admin/user version when testing
-        switchAdmin = findViewById(R.id.switchAdmin);
+        Switch switchAdmin = findViewById(R.id.switchAdmin);
         switchAdmin.setChecked(isAdmin);
         if (TESTING) {
             switchAdmin.setOnClickListener(new View.OnClickListener() {
@@ -211,15 +210,6 @@ public class MainActivity extends AppCompatActivity {
         reloadContent();
 
         INIT = false;
-
-        if (TESTING) {
-            Log.d("MainActivity",
-                    "thingy = " + iceCreamFlavorList.size()
-            );
-            Log.d("MainActivity",
-                    "thingy = " + recyclerView.getAdapter().getItemCount()
-            );
-        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -234,9 +224,10 @@ public class MainActivity extends AppCompatActivity {
                     "Returned from AdminEditActivity with dataStatus=" + resultCode + "..."
             );
 
-        // if info was changed, reload the content
+        // if info was changed, reload the content and update the view
         if (resultCode == AdminEditActivity.MODIFIED) {
             reloadContent();
+            updateViewType();
         }
 
         // otherwise do nothing
@@ -299,6 +290,11 @@ public class MainActivity extends AppCompatActivity {
 
         iceCreamFlavorList.reloadFlavorsFromJSON(flavorFile);
         otherFlavorList.reloadFlavorsFromJSON(flavorFile);
+        iceCreamAdapter.notifyDataChanged();
+        otherFlavorAdapter.notifyDataChanged();
+
+        if (TESTING)
+            Log.d("MainActivity", "iceCreamFlavorList.size()=" + iceCreamFlavorList.size());
 
         swipeRefreshLayout.setRefreshing(false);
     }

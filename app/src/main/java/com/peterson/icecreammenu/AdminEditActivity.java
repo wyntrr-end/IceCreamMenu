@@ -151,21 +151,24 @@ public class AdminEditActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // if the activity was not cancelled, reload the content
+        // if the activity was not cancelled, reload the content and set the dataStatus
         if (resultCode != AddEditFlavorActivity.CANCELLED) {
             reloadContent();
-            dataStatus = MODIFIED;
+            setDataStatus(MODIFIED);
         }
 
         // otherwise do nothing
     }
 
+
+    // ---------------------------------------------------------------------------------------------
+    // make sure we pass the data status back to MainActivity to respond to any data changes
+    // ---------------------------------------------------------------------------------------------
     @Override
     public void onBackPressed() {
         returnToMainActivity();
         super.onBackPressed();
     }
-
     private void returnToMainActivity() {
         if (MainActivity.TESTING)
             Log.d("AdminEditActivity",
@@ -186,10 +189,14 @@ public class AdminEditActivity extends AppCompatActivity {
         File flavorFile = new File(getApplicationContext().getFilesDir(), getString(R.string.flavor_filename));
 
         iceCreamFlavorList.reloadFlavorsFromJSON(flavorFile);
-        iceCreamAdapter.notifyDataSetChanged();
         otherFlavorList.reloadFlavorsFromJSON(flavorFile);
-        otherFlavorAdapter.notifyDataSetChanged();
+        iceCreamAdapter.notifyDataChanged();
+        otherFlavorAdapter.notifyDataChanged();
 
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    public void setDataStatus(int dataStatus) {
+        this.dataStatus = dataStatus;
     }
 }

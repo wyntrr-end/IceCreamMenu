@@ -21,10 +21,11 @@ import java.io.File;
 // in the main RecyclerView.
 // =================================================================================================
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
-    private FlavorList mFlavorList;
-    private Context mContext;
+    private final FlavorList mFlavorList;
+    private FlavorList availFlavorList;
+    private final Context mContext;
     private int viewMode = MainActivity.VIEW_LIST;
-    private File flavorFile;
+    private final File flavorFile;
 
     private AdminEditActivity mAdminEditActivity;
 
@@ -32,8 +33,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // basic constructor
     // ---------------------------------------------------------------------------------------------
     public MyAdapter(Context context, FlavorList flavorList) {
+        if (MainActivity.TESTING)
+            Log.d("MyAdapter", "Created new MyAdapter from generic context");
         mContext = context;
         mFlavorList = flavorList;
+        availFlavorList = new FlavorList(mFlavorList.getType());
+        refreshAvailableFlavors();
+
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
     // ---------------------------------------------------------------------------------------------
@@ -48,7 +54,32 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // create new views (invoked by the layout manager)
+    // custom data changed notification method to ensure the lists are updated
+    // ---------------------------------------------------------------------------------------------
+    public void notifyDataChanged() {
+        if (MainActivity.TESTING)
+            Log.d("MyAdapter", "Notifying data changed");
+        refreshAvailableFlavors();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // discard and rebuild the list of available flavors
+    // ---------------------------------------------------------------------------------------------
+    private void refreshAvailableFlavors() {
+        if (availFlavorList == null) {
+            Log.e("MyAdapter", "refreshAvailableFlavors called when availFlavorList is null");
+            return;
+        }
+        availFlavorList.clear();
+        for (int i = 0; i < mFlavorList.size(); i++) {
+            FlavorItem f = mFlavorList.get(i);
+            if (f.isAvailable())
+                availFlavorList.addFlavor(f);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // create new view holders for each item (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public FlavorHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,13 +97,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // set the contents of a view (invoked by the layout manager)
+    // set the contents of an item view holder (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public void onBindViewHolder(final FlavorHolder holder, final int position) {
+        FlavorList flavors = (viewMode == MainActivity.VIEW_EDIT) ? mFlavorList : availFlavorList;
+
         // get the FlavorItem at this position
         final FlavorItem flavor = new FlavorItem();
-        flavor.readFromJSONFile(flavorFile, mFlavorList.get(position).getName());
+        flavor.readFromJSONFile(flavorFile, flavors.get(position).getName());
 
         // replace the contents of the view with values appropriate for that FlavorItem
         String flavorImgName = flavor.getImgName();
@@ -93,15 +126,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
             //set the availability checkbox appropriately
             holder.chAvailable.setChecked(flavor.isAvailable());
 
-            // when the item is clicked, toggle the availability
+            // when the item is clicked, toggle the availability of the flavor and save the
+            // change in the file
             holder.linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO -- deal with toggling and saving the availability
                     holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
-                    flavor.setAvailability(holder.chAvailable.isChecked());
+
+                    // we can use the position in mFlavorList because this code will only be reached
+                    // in Edit mode, when the position comes from mFlavorList
                     mFlavorList.get(position).setAvailability(holder.chAvailable.isChecked());
+
+                    flavor.setAvailability(holder.chAvailable.isChecked());
                     flavor.writeToJSONFile(flavorFile);
+
+                    // make sure to set the status to MODIFIED so MainActivity responds properly
+                    mAdminEditActivity.setDataStatus(AdminEditActivity.MODIFIED);
                 }
             });
 
@@ -111,34 +151,23 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                     @Override
                     public void onClick(View view) {
                         Log.d(
-                                "Adapter",
+                                "MyAdapter",
                                 "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
                         );
                         mAdminEditActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
                     }
                 });
         }
-        else {
-            if (flavor.isAvailable()) {
-                holder.itemView.setVisibility(View.VISIBLE);
-                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            } else {
-                Log.d(
-                        "Adapter",
-                        "flavor unavailable: " + holder.nameTextView.getText()
-                );
-                holder.itemView.setVisibility(View.GONE);
-                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-            }
-        }
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Return the size of the dataset (invoked by the layout manager)
+    // Return the size of the current dataset (invoked by the layout manager)
     // ---------------------------------------------------------------------------------------------
     @Override
     public int getItemCount() {
-        return mFlavorList.size();
+        if (viewMode == MainActivity.VIEW_EDIT)
+            return mFlavorList.size();
+        return availFlavorList.size();
     }
 
     // ---------------------------------------------------------------------------------------------
