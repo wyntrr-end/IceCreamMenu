@@ -224,9 +224,10 @@ public class MainActivity extends AppCompatActivity {
                     "Returned from AdminEditActivity with dataStatus=" + resultCode + "..."
             );
 
-        // if info was changed, reload the content
+        // if info was changed, reload the content and update the view
         if (resultCode == AdminEditActivity.MODIFIED) {
             reloadContent();
+            updateViewType();
         }
 
         // otherwise do nothing

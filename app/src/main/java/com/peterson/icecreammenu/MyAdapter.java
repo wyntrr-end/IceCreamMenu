@@ -139,6 +139,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
 
                     flavor.setAvailability(holder.chAvailable.isChecked());
                     flavor.writeToJSONFile(flavorFile);
+
+                    // make sure to set the status to MODIFIED so MainActivity responds properly
+                    mAdminEditActivity.setDataStatus(AdminEditActivity.MODIFIED);
                 }
             });
 
