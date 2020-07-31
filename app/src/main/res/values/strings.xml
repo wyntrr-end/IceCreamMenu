@@ -1,6 +1,7 @@
 <resources>
     <string name="flavor_filename" translatable="false">flavors.json</string>
 
+    <!--main activity-->
     <string name="app_name">Ice Cream Menu</string>
     <string name="app_name_short">IC Menu</string>
     <string name="main_header">Today\'s Flavors</string>
@@ -8,10 +9,12 @@
     <string name="tab1_header">Ice Cream</string>
     <string name="tab2_header">Gelato &amp; Sorbet</string>
 
+    <!--admin edit mode-->
     <string name="admin_edit_mode_header">Edit Flavors and Availability</string>
     <string name="autosave_description">Changes on this page are automatically saved.</string>
     <string name="checkbox_explanation">Tap a flavor to toggle availability.</string>
 
+    <!--add/edit flavor-->
     <string name="add_flavor_header">Add New Flavor</string>
     <string name="edit_flavor_header">Edit Flavor</string>
     <string name="add_flavor_name_text">Flavor Name</string>
@@ -23,22 +26,20 @@
     <string name="add_flavor_slot_caption">(From Customer Perspective)</string>
     <string name="delete_flavor">Delete This Flavor</string>
 
+    <!--delete alert-->
     <string name="delete_alert_title">Delete flavor?</string>
     <string name="delete_alert_message">This action cannot be undone.</string>
     <string name="delete_alert_positive">Yes</string>
     <string name="delete_alert_negative">No</string>
 
-    <string name="title_activity_admin_edit">AdminEditActivity</string>
-
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--tooltips-->
+    <string name="edit_mode_tooltip">Edit Flavors and Availability</string>
+    <string name="admin_switch_tooltip">Toggle Admin or User View</string>
+    <string name="view_mode_tooltip">Toggle List or Grid View</string>
+    <string name="data_button_tooltip">Load Sample Data</string>
+    <string name="add_flavor_tooltip">Add a New Flavor</string>
+    <string name="uncheck_all_tooltip">Uncheck All Flavors</string>
+    <string name="cancel_tooltip">Cancel</string>
+    <string name="save_tooltip">Save</string>
+    <string name="add_image_tooltip">Add/Replace Image</string>
 </resources>

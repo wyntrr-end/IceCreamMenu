@@ -35,6 +35,7 @@
 
             <ImageButton
                 android:id="@+id/btnEdit"
+                android:tooltipText="@string/edit_mode_tooltip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
@@ -45,12 +46,14 @@
 
             <Switch
                 android:id="@+id/switchAdmin"
+                android:tooltipText="@string/admin_switch_tooltip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0" />
 
             <ImageButton
                 android:id="@+id/btnViewMode"
+                android:tooltipText="@string/view_mode_tooltip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
@@ -67,6 +70,7 @@
 
     <Button
         android:id="@+id/btnLoadData"
+        android:tooltipText="@string/data_button_tooltip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="4dp"

@@ -20,6 +20,7 @@
 
         <ImageButton
             android:id="@+id/btnBack2"
+            android:tooltipText="@string/cancel_tooltip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -40,6 +41,7 @@
 
         <ImageButton
             android:id="@+id/btnSave"
+            android:tooltipText="@string/save_tooltip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -70,6 +72,7 @@
 
             <ImageButton
                 android:id="@+id/btnAddImage"
+                android:tooltipText="@string/add_image_tooltip"
                 android:layout_width="185dp"
                 android:layout_height="185dp"
                 android:background="?attr/actionBarItemBackground"

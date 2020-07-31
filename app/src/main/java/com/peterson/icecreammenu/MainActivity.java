@@ -199,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     loadSampleInfo();
                     reloadContent();
+                    updateViewType();
                 }
             });
         } else {
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
         // update the view mode and get the current adapter
         iceCreamAdapter.setViewMode(viewMode);
         otherFlavorAdapter.setViewMode(viewMode);
-        MyAdapter mAdapter = (MyAdapter) recyclerView.getAdapter();
+        MyAdapter adapter = (MyAdapter) recyclerView.getAdapter();
 
         // set the layout manager according to the current view mode
         if (viewMode == VIEW_GRID) {
@@ -267,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
         }
         // reset the adapter to refresh the layout
-        recyclerView.setAdapter(mAdapter);
+        recyclerView.setAdapter(adapter);
     }
 
     // ---------------------------------------------------------------------------------------------
