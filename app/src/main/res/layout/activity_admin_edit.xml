@@ -30,21 +30,52 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize" />
 
-        <TextView
-            android:id="@+id/txtExplanation"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:text="@string/checkbox_explanation"
-            android:textAlignment="center" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="8dp">
 
-        <TextView
-            android:id="@+id/txtAutosave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/autosave_description"
-            android:textAlignment="center" />
+            <ImageButton
+                android:id="@+id/btnUncheckAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="?attr/actionBarItemBackground"
+                android:padding="8dp"
+                android:tooltipText="@string/uncheck_all_tooltip"
+                app:srcCompat="@drawable/ic_checklist_24" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtExplanation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/checkbox_explanation"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:id="@+id/txtAutosave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/autosave_description"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
 
         <include
             layout="@layout/fragment_recycler_view"
@@ -55,6 +86,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddFlavor"
+        android:tooltipText="@string/add_flavor_tooltip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
