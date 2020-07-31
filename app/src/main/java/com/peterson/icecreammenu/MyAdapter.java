@@ -50,8 +50,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // discard and rebuild the list of available flavors
+    // ---------------------------------------------------------------------------------------------
     private void refreshAvailableFlavors() {
-        if (availFlavorList != null) availFlavorList.clear();
+        if (availFlavorList == null) {
+            Log.e("MyAdapter", "refreshAvailableFlavors called when availFlavorList is null");
+            return;
+        }
+        availFlavorList.clear();
         for (int i = 0; i < mFlavorList.size(); i++) {
             FlavorItem f = mFlavorList.get(i);
             if (f.isAvailable())
@@ -82,9 +89,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // ---------------------------------------------------------------------------------------------
     @Override
     public void onBindViewHolder(final FlavorHolder holder, final int position) {
+        FlavorList flavors = (viewMode == MainActivity.VIEW_EDIT) ? mFlavorList : availFlavorList;
+
         // get the FlavorItem at this position
         final FlavorItem flavor = new FlavorItem();
-        flavor.readFromJSONFile(flavorFile, mFlavorList.get(position).getName());
+        flavor.readFromJSONFile(flavorFile, flavors.get(position).getName());
 
         // replace the contents of the view with values appropriate for that FlavorItem
         String flavorImgName = flavor.getImgName();
@@ -105,14 +114,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
             //set the availability checkbox appropriately
             holder.chAvailable.setChecked(flavor.isAvailable());
 
-            // when the item is clicked, toggle the availability
+            // when the item is clicked, toggle the availability of the flavor and save the
+            // change in the file
             holder.linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO -- deal with toggling and saving the availability
                     holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
-                    flavor.setAvailability(holder.chAvailable.isChecked());
+
                     mFlavorList.get(position).setAvailability(holder.chAvailable.isChecked());
+
+                    flavor.setAvailability(holder.chAvailable.isChecked());
                     flavor.writeToJSONFile(flavorFile);
                 }
             });
@@ -123,26 +134,26 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                     @Override
                     public void onClick(View view) {
                         Log.d(
-                                "Adapter",
+                                "MyAdapter",
                                 "launchEditFlavorActivity for flavor " + holder.nameTextView.getText()
                         );
                         mAdminEditActivity.launchEditFlavorActivity(holder.nameTextView.getText().toString());
                     }
                 });
         }
-        else {
-            if (flavor.isAvailable()) {
-                holder.itemView.setVisibility(View.VISIBLE);
-                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            } else {
-                Log.d(
-                        "Adapter",
-                        "flavor unavailable: " + holder.nameTextView.getText()
-                );
-                holder.itemView.setVisibility(View.GONE);
-                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-            }
-        }
+//        else {
+//            if (flavor.isAvailable()) {
+//                holder.itemView.setVisibility(View.VISIBLE);
+//                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//            } else {
+//                Log.d(
+//                        "MyAdapter",
+//                        "flavor unavailable: " + holder.nameTextView.getText()
+//                );
+//                holder.itemView.setVisibility(View.GONE);
+//                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+//            }
+//        }
     }
 
     // ---------------------------------------------------------------------------------------------
