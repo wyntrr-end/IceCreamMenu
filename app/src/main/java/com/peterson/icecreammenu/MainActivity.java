@@ -289,6 +289,11 @@ public class MainActivity extends AppCompatActivity {
 
         iceCreamFlavorList.reloadFlavorsFromJSON(flavorFile);
         otherFlavorList.reloadFlavorsFromJSON(flavorFile);
+        iceCreamAdapter.notifyDataChanged();
+        otherFlavorAdapter.notifyDataChanged();
+
+        if (TESTING)
+            Log.d("MainActivity", "iceCreamFlavorList.size()=" + iceCreamFlavorList.size());
 
         swipeRefreshLayout.setRefreshing(false);
     }

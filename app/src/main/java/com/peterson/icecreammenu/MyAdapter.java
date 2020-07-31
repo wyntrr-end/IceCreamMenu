@@ -33,10 +33,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
     // basic constructor
     // ---------------------------------------------------------------------------------------------
     public MyAdapter(Context context, FlavorList flavorList) {
+        if (MainActivity.TESTING)
+            Log.d("MyAdapter", "Created new MyAdapter from generic context");
         mContext = context;
         mFlavorList = flavorList;
         availFlavorList = new FlavorList(mFlavorList.getType());
         refreshAvailableFlavors();
+
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
     }
     // ---------------------------------------------------------------------------------------------
@@ -48,6 +51,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
         mFlavorList = flavorList;
         viewMode = MainActivity.VIEW_EDIT;
         flavorFile = new File(mContext.getFilesDir(), "flavors.json");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // custom data changed notification method to ensure the lists are updated
+    // ---------------------------------------------------------------------------------------------
+    public void notifyDataChanged() {
+        if (MainActivity.TESTING)
+            Log.d("MyAdapter", "Notifying data changed");
+        refreshAvailableFlavors();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -121,6 +133,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                 public void onClick(View view) {
                     holder.chAvailable.setChecked(!holder.chAvailable.isChecked());
 
+                    // we can use the position in mFlavorList because this code will only be reached
+                    // in Edit mode, when the position comes from mFlavorList
                     mFlavorList.get(position).setAvailability(holder.chAvailable.isChecked());
 
                     flavor.setAvailability(holder.chAvailable.isChecked());
@@ -141,19 +155,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.FlavorHolder> {
                     }
                 });
         }
-//        else {
-//            if (flavor.isAvailable()) {
-//                holder.itemView.setVisibility(View.VISIBLE);
-//                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//            } else {
-//                Log.d(
-//                        "MyAdapter",
-//                        "flavor unavailable: " + holder.nameTextView.getText()
-//                );
-//                holder.itemView.setVisibility(View.GONE);
-//                holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-//            }
-//        }
     }
 
     // ---------------------------------------------------------------------------------------------

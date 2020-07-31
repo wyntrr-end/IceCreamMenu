@@ -186,9 +186,9 @@ public class AdminEditActivity extends AppCompatActivity {
         File flavorFile = new File(getApplicationContext().getFilesDir(), getString(R.string.flavor_filename));
 
         iceCreamFlavorList.reloadFlavorsFromJSON(flavorFile);
-        iceCreamAdapter.notifyDataSetChanged();
+        iceCreamAdapter.notifyDataChanged();
         otherFlavorList.reloadFlavorsFromJSON(flavorFile);
-        otherFlavorAdapter.notifyDataSetChanged();
+        otherFlavorAdapter.notifyDataChanged();
 
         swipeRefreshLayout.setRefreshing(false);
     }
