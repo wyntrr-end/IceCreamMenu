@@ -16,6 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 
 import java.io.File;
 
@@ -71,6 +72,14 @@ public class AdminEditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 returnToMainActivity();
+            }
+        });
+
+        ImageButton btnUncheckAll = findViewById(R.id.btnUncheckAll);
+        btnUncheckAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                uncheckAll();
             }
         });
 
@@ -188,12 +197,38 @@ public class AdminEditActivity extends AppCompatActivity {
         // read in the "flavors.json" file and get an array of the contained flavor names
         File flavorFile = new File(getApplicationContext().getFilesDir(), getString(R.string.flavor_filename));
 
+        MyAdapter adapter = (MyAdapter) recyclerView.getAdapter();
+
         iceCreamFlavorList.reloadFlavorsFromJSON(flavorFile);
         otherFlavorList.reloadFlavorsFromJSON(flavorFile);
         iceCreamAdapter.notifyDataChanged();
         otherFlavorAdapter.notifyDataChanged();
 
+        recyclerView.setAdapter(adapter);
+
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // mark all flavors as unavailable
+    // ---------------------------------------------------------------------------------------------
+    private void uncheckAll() {
+        File flavorFile = new File(getApplicationContext().getFilesDir(), getString(R.string.flavor_filename));
+
+        for (int i = 0; i < iceCreamFlavorList.size(); i++) {
+            final FlavorItem flavor = new FlavorItem();
+            flavor.readFromJSONFile(flavorFile, iceCreamFlavorList.get(i).getName());
+            flavor.setAvailability(false);
+            flavor.writeToJSONFile(flavorFile);
+        }
+        for (int i = 0; i < otherFlavorList.size(); i++) {
+            final FlavorItem flavor = new FlavorItem();
+            flavor.readFromJSONFile(flavorFile, otherFlavorList.get(i).getName());
+            flavor.setAvailability(false);
+            flavor.writeToJSONFile(flavorFile);
+        }
+        reloadContent();
+        setDataStatus(MODIFIED);
     }
 
     public void setDataStatus(int dataStatus) {
